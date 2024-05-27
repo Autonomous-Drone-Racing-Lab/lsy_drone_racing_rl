@@ -28,8 +28,11 @@ from gymnasium.spaces import Box
 from safe_control_gym.controllers.firmware.firmware_wrapper import FirmwareWrapper
 
 from lsy_drone_racing.env_transformation.transform_simple import Experiment_1_Environment_Transformation as ENV_TRANSFORM
+from lsy_drone_racing.state_estimator import StateEstimator
 from lsy_drone_racing.utils.rewards import distance_reward, progress_reward, smooth_action_reward
 logger = logging.getLogger(__name__)
+
+
 
 
 class DroneRacingWrapper(Wrapper):
@@ -41,20 +44,19 @@ class DroneRacingWrapper(Wrapper):
 
     metadata = {"render_modes": ["human"]}
 
-    def __init__(self, env: FirmwareWrapper, terminate_on_lap: bool = True):
+    def __init__(self, env: FirmwareWrapper, config, random_initialization:bool = True, terminate_on_lap: bool = True):
         """Initialize the wrapper.
 
         Args:
             env: The firmware wrapper.
             terminate_on_lap: Stop the simulation early when the drone has passed the last gate.
         """
-        print("init wrapper")
         if not isinstance(env, FirmwareWrapper):
             raise TypeError(f"`env` must be an instance of `FirmwareWrapper`, is {type(env)}")
         super().__init__(env)
         # Patch the FirmwareWrapper to add any missing attributes required by the gymnasium API.
         self.env = env
-        self.env.unwrapped = []  # Changes this to allow for vectorized environments
+        self.env.unwrapped = []  # Changed this to allow for vectorized environments
         self.env.render_mode = None
 
         # Gymnasium env required attributes
@@ -92,12 +94,24 @@ class DroneRacingWrapper(Wrapper):
         # self.observation_space = Box(obs_limits_low, obs_limits_high, dtype=np.float32)
 
         # custmized solution for my experiment
-        drone_limits = [5, 5, 5, np.pi]
-        # one gate is described by 4 corner values (x,y,z)
-        gate_limits = [5, 5, 5] * 4
-        obs_limits = drone_limits + gate_limits
-        obs_limits_high = np.array(obs_limits)
-        obs_limit_low = -obs_limits_high
+        world_lower_bound = np.array([-2, -2, 0])
+        world_upper_bound = np.array([2, 2, 2])
+        # drone_position_limits_upper = np.concatenate([world_upper_bound, [np.pi]])
+        # drone_position_limits_lower = world_lower_bound
+        drone_vel_limits_upper = np.array([7, 7, 7])
+        drone_vel_limits_lower = -drone_vel_limits_upper
+        drone_acc_limits_upper = np.array([7, 7, 7])
+        drone_acc_limits_lower = -drone_acc_limits_upper
+        drone_yaw_limits_upper = np.array([np.pi])
+        drone_yaw_limits_lower = -drone_yaw_limits_upper
+
+        max_difference = world_upper_bound - world_lower_bound
+        gate_upper_limits = np.concatenate([max_difference, max_difference, max_difference, max_difference]) # 4 corners
+        gate_lower_limits = -gate_upper_limits
+
+        obs_limit_low = np.concatenate([world_lower_bound, drone_vel_limits_lower, drone_acc_limits_lower, drone_yaw_limits_lower,  gate_lower_limits])
+        obs_limits_high = np.concatenate([world_upper_bound, drone_vel_limits_upper, drone_acc_limits_upper, drone_yaw_limits_upper, gate_upper_limits])
+
         self.observation_space = Box(obs_limit_low, obs_limits_high, dtype=np.float32)
 
         self.pyb_client_id: int = env.env.PYB_CLIENT
@@ -117,6 +131,10 @@ class DroneRacingWrapper(Wrapper):
 
 
         # Custom by me extra values we must keep track of because they are only available in the initial info dict
+        self.random_initialization = random_initialization
+        self.no_gates = len(config.quadrotor_config["gates"])
+        self.rng = np.random.default_rng()
+        self.state_estimator = StateEstimator(buffer_size=10) #! Todo test buffer sizes
         
 
     @property
@@ -136,21 +154,39 @@ class DroneRacingWrapper(Wrapper):
         Returns:
             The initial observation and info dict of the next episode.
         """
+
+        if seed is not None:
+            self.rng = np.random.default_rng(seed)
+
+
         self._reset_required = False
         self._sim_time = 0.0
         self._f_rotors[:] = 0.0
-        obs, info = self.env.reset()
+        self.state_estimator.reset()
+
+        reset_kwargs = {}
+        if self.random_initialization:
+            random_gate_id = self.rng.integers(0, self.no_gates)
+            reset_kwargs["initial_target_gate_id"] = random_gate_id
+
+        obs, info = self.env.reset(**reset_kwargs)
         # Store obstacle height for observation expansion during env steps.
         obs = self.observation_transform(obs, info)
+        self.state_estimator.add_measurement(obs[0][:3], self._sim_time)
+        estimated_velocity, estimated_acceleration = self.state_estimator.estimate_state()
+        assert (estimated_velocity == np.zeros(3)).all() and (estimated_acceleration == np.zeros(3)).all(), "Initial state estimation must be zero"
+        reset_kwargs = {"estimated_velocity": estimated_velocity, "estimated_acceleration": estimated_acceleration}
+        transformed_obs = ENV_TRANSFORM.transform_observation(obs, **reset_kwargs)
 
 
         self.prev_drone_pose = obs[0]
         self.initial_drone_pose = obs[0]
         self.prev_action = None
 
-        # assert obs in self.observation_space, f"Invalid observation: {obs}"
-        transformed_obs = ENV_TRANSFORM.transform_observation(obs)
-        return transformed_obs, info
+        self.no_gates_passed = 0
+        self.last_gate_to_pass_id = obs[5]
+       
+        return transformed_obs, self.info_transform(info)
 
     def step(self, action: np.ndarray) -> tuple[np.ndarray, float, bool, bool, dict]:
         """Take a step in the environment.
@@ -175,9 +211,13 @@ class DroneRacingWrapper(Wrapper):
         # interface. We automatically insert the sim time and reuse the last rotor forces.
         obs, _, done, info, f_rotors = self.env.step(self._sim_time, action=self._f_rotors)
         self._f_rotors[:] = f_rotors
+        obs = self.observation_transform(obs, info)
+        self.state_estimator.add_measurement(obs[0][:3], self._sim_time)
 
+        estimated_velocity, estimated_acceleration = self.state_estimator.estimate_state()
+        kwargs = {"estimated_velocity": estimated_velocity, "estimated_acceleration": estimated_acceleration}
+        transformed_obs = ENV_TRANSFORM.transform_observation(obs, **kwargs)
         
-
         # We set truncated to True if the task is completed but the drone has not yet passed the
         # final gate. We set terminated to True if the task is completed and the drone has passed
         # the final gate.
@@ -192,7 +232,7 @@ class DroneRacingWrapper(Wrapper):
         # Increment the sim time after the step if we are not yet done.
         if not terminated and not truncated:
             self._sim_time += self.env.ctrl_dt
-        obs = self.observation_transform(obs, info)
+
        
         
         # Get the reward
@@ -205,14 +245,13 @@ class DroneRacingWrapper(Wrapper):
         _, did_collide = info["collision"]
         has_error = info["has_error"]
 
-        transformed_obs = ENV_TRANSFORM.transform_observation(obs)
-        #print(f"Transformed obs {transformed_obs}")
+
         
         termination_reward = 0
         if has_error:
             assert terminated
             termination_reward = -5
-            print("Added extra punishement, i.e. because of tumbling")
+           # print("Added extra punishement, i.e. because of tumbling")
         elif did_collide:
             assert terminated
             termination_reward = -5
@@ -220,23 +259,32 @@ class DroneRacingWrapper(Wrapper):
         elif transformed_obs not in self.observation_space:
             termination_reward = -5
             terminated = True
-            print(f"Added extra punishement, i.e. because of out of bounds, transformed obs: {transformed_obs}, pose {current_drone_pose}")
+            #print(f"Added extra punishement, i.e. because of out of bounds, transformed obs: {transformed_obs}, pose {current_drone_pose}")
 
         hover_penalty = distance_reward(current_drone_pose, self.initial_drone_pose[:3])
 
-        lambda_progress = 0
+        lambda_progress = 1
         lambda_smooth_action = 0
         lambda_termination = 1
         lambda_time = 0
-        lambda_hover = 1
+        lambda_hover = 0
 
         reward = lambda_progress * progress_reward_value + lambda_smooth_action * smooth_action_reward_value + lambda_termination * termination_reward + lambda_hover * hover_penalty + lambda_time
 
         self._reset_required = terminated or truncated
+        
+        # Keep track of extra values-------------------------------------------------
         self.prev_drone_pose = current_drone_pose
         self.prev_action = action
+        current_gate_id = obs[5]
+        
+        # Keep track of number of gates passed 
+        if current_gate_id != self.last_gate_to_pass_id:
+            self.no_gates_passed += 1
+            self.last_gate_to_pass_id = current_gate_id
+        info["no_gates_passed"] = self.no_gates_passed
 
-        return transformed_obs, reward, terminated, truncated, info
+        return transformed_obs, reward, terminated, truncated, self.info_transform(info)
 
     def _action_transform(self, action: np.ndarray) -> np.ndarray:
         """Transform the action to the format expected by the firmware env.
@@ -289,6 +337,21 @@ class DroneRacingWrapper(Wrapper):
             info["current_gate_id"],
         ]
         return obs
+    
+    def info_transform(self, info: dict[str, Any]) -> dict[str, Any]:
+        """
+        Transform the info dict, strip all non-pickable information from it to support multitasking.
+        This mainly means that we remove all casadi objects from the info dict.
+        ToDo!!! We must find out whether casadi is even parallelizable
+
+        For now until we know how to do that, only return keys where value is eithe rprimitive type, numpy array or dict
+        """
+        allowed_types = [int, float, np.ndarray, dict, tuple]
+        transformed_info = {}
+        for key, value in info.items():
+            if type(value) in allowed_types:
+                transformed_info[key] = value
+        return transformed_info
 
 
 class DroneRacingObservationWrapper:

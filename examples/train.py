@@ -16,12 +16,15 @@ from safe_control_gym.utils.registration import make
 from stable_baselines3 import PPO
 from stable_baselines3.common.env_checker import check_env
 from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
-from stable_baselines3.common.env_util import make_vec_env
+
 from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
 
 from lsy_drone_racing.constants import FIRMWARE_FREQ
 from lsy_drone_racing.utils import load_config
 from lsy_drone_racing.wrapper import DroneRacingWrapper
+from safe_control_gym.envs.env_wrappers.vectorized_env import make_vec_envs
+from stable_baselines3.common.vec_env.vec_monitor import VecMonitor
+#from safe_control_gym.envs.env_wrappers.vectorized_env import SubprocVecEnv
 
 logger = logging.getLogger(__name__)
 import os
@@ -58,12 +61,13 @@ def create_experiment_log_folder(logs_dir, experiment_name):
     
     return new_folder_path
 
-def create_race_env(config_path: Path, gui: bool = False) -> DroneRacingWrapper:
+def create_race_env(config_path: Path, rank=0, random_gate_init: bool=False, gui: bool = False) -> DroneRacingWrapper:
     """Create the drone racing environment."""
     # Load configuration and check if firmare should be used.
     config = load_config(config_path)
     # Overwrite config options
     config.quadrotor_config.gui = gui
+    config.quadrotor_config.seed = config.quadrotor_config.seed + rank
     CTRL_FREQ = config.quadrotor_config["ctrl_freq"]
     # Create environment
     assert config.use_firmware, "Firmware must be used for the competition."
@@ -72,17 +76,17 @@ def create_race_env(config_path: Path, gui: bool = False) -> DroneRacingWrapper:
     config.quadrotor_config["ctrl_freq"] = FIRMWARE_FREQ
     env_factory = partial(make, "quadrotor", **config.quadrotor_config)
     firmware_env = make("firmware", env_factory, FIRMWARE_FREQ, CTRL_FREQ)
-    env =  DroneRacingWrapper(firmware_env, terminate_on_lap=True)
-    unwrap = env.unwrapped
+    env =  DroneRacingWrapper(firmware_env,config=config, terminate_on_lap=True, random_initialization=random_gate_init)
+    env.reset(seed=config.quadrotor_config.seed)
     check_env(env)
     #print(f" env factory id {id(env)} firmware id {id(firmware_env)} env id {id(env)}, unwrap {unwrap} unwrap id {id(unwrap)}")
     return env
 
-
     
-def make_env(config_path: Path):
+def make_env(config_path: Path, rank: int):
     def _init():
-        return create_race_env(config_path=config_path, gui=False)
+        env = create_race_env(config_path=config_path, rank=rank, gui=False, random_gate_init=True)
+        return env
     return _init
 
 
@@ -90,32 +94,37 @@ def main(config: str = "config/getting_started.yaml", gui: bool = False):
     """Create the environment, check its compatibility with sb3, and run a PPO agent."""
     logging.basicConfig(level=logging.INFO)
     config_path = Path(__file__).resolve().parents[1] / config
-    #env = create_race_env(config_path=config_path, gui=True)
-    #check_env(env)  # Sanity check to ensure the environment conforms to the sb3 API
+    #env = create_race_env(config_path=config_path, gui=True, random_gate_init=False)
 
 
     # create logs folder
     log_folder = "./logs"
-    name = "hover"
+    name = "multi_gate_state_observation"
     logs_dir = create_experiment_log_folder(log_folder, name)
 
     #envs = make_vec_env(make_env(config_path), n_envs=4, vec_env_cls=DummyVecEnv)
-    num_processes = 1
-    envs = DummyVecEnv([make_env(config_path) for _ in range(num_processes)])
 
-    eval_frequency = 10000
+    num_processes = 4
+    envs = SubprocVecEnv([make_env(config_path, rank=i) for i in range(4)])
+    envs = VecMonitor(envs)
+
+    eval_frequency = 50000
     eval_frquency_scaled = eval_frequency  // num_processes
-    checkpoint_callback = CheckpointCallback(save_freq=eval_frquency_scaled, save_path=logs_dir,
+    checkpoint_frequency = 100000
+    checkpoint_frequency_scaled = checkpoint_frequency // num_processes
+
+    checkpoint_callback = CheckpointCallback(save_freq=checkpoint_frequency_scaled, save_path=logs_dir,
                                              name_prefix='rl_model', verbose=2)
     
-    eval_env = create_race_env(config_path=config_path, gui=False)
+    eval_env = create_race_env(config_path=config_path, gui=False, random_gate_init=False)
     eval_callback = EvalCallback(eval_env, best_model_save_path=logs_dir,
                                  log_path=logs_dir, eval_freq=eval_frquency_scaled,
                                  deterministic=True, render=False)
 
     model = PPO("MlpPolicy", envs, verbose=1, tensorboard_log=logs_dir)
-    model.learn(total_timesteps=2000000, callback=[checkpoint_callback, eval_callback], progress_bar=True)
+    model.learn(total_timesteps=20000000, callback=[checkpoint_callback, eval_callback], progress_bar=True)
 
 
 if __name__ == "__main__":
-    fire.Fire(main)
+   # fire.Fire(main)
+   main()

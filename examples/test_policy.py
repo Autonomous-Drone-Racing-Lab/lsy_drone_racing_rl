@@ -26,12 +26,14 @@ from stable_baselines3.common.evaluation import evaluate_policy
 logger = logging.getLogger(__name__)
 
 
-def create_race_env(config_path: Path, gui: bool = False) -> DroneRacingWrapper:
+
+def create_race_env(config_path: Path, rank=0, random_gate_init: bool=False, gui: bool = False) -> DroneRacingWrapper:
     """Create the drone racing environment."""
     # Load configuration and check if firmare should be used.
     config = load_config(config_path)
     # Overwrite config options
     config.quadrotor_config.gui = gui
+    config.quadrotor_config.seed = config.quadrotor_config.seed + rank
     CTRL_FREQ = config.quadrotor_config["ctrl_freq"]
     # Create environment
     assert config.use_firmware, "Firmware must be used for the competition."
@@ -40,12 +42,16 @@ def create_race_env(config_path: Path, gui: bool = False) -> DroneRacingWrapper:
     config.quadrotor_config["ctrl_freq"] = FIRMWARE_FREQ
     env_factory = partial(make, "quadrotor", **config.quadrotor_config)
     firmware_env = make("firmware", env_factory, FIRMWARE_FREQ, CTRL_FREQ)
-    return DroneRacingWrapper(firmware_env, terminate_on_lap=True)
+    env =  DroneRacingWrapper(firmware_env,config=config, terminate_on_lap=True, random_initialization=random_gate_init)
+    env.reset(seed=config.quadrotor_config.seed)
+    check_env(env)
+    #print(f" env factory id {id(env)} firmware id {id(firmware_env)} env id {id(env)}, unwrap {unwrap} unwrap id {id(unwrap)}")
+    return env
 
 
-def main(checkpoint_path:str, config: str = "config/getting_started.yaml", gui: bool = True):
+def main(checkpoint_path:str, config: str = "config/getting_started.yaml"):
     config_path = Path(__file__).resolve().parents[1] / config
-    env = create_race_env(config_path=config_path, gui=gui)
+    env = create_race_env(config_path=config_path, gui=True, random_gate_init=True, rank=0)
     check_env(env)  # Sanity check to ensure the environment conforms to the sb3 API
 
     # load the model
