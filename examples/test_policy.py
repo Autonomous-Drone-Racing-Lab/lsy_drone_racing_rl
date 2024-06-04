@@ -20,11 +20,10 @@ from stable_baselines3.common.vec_env import SubprocVecEnv
 
 from lsy_drone_racing.constants import FIRMWARE_FREQ
 from lsy_drone_racing.utils import load_config
+from lsy_drone_racing.utils.logging import setup_test_logger
 from lsy_drone_racing.wrapper import DroneRacingWrapper
 from stable_baselines3.common.evaluation import evaluate_policy
-
-logger = logging.getLogger(__name__)
-
+import sys
 
 
 def create_race_env(config_path: Path, rank=0, random_gate_init: bool=False, gui: bool = False) -> DroneRacingWrapper:
@@ -51,8 +50,10 @@ def create_race_env(config_path: Path, rank=0, random_gate_init: bool=False, gui
 
 def main(checkpoint_path:str, config: str = "config/getting_started.yaml"):
     config_path = Path(__file__).resolve().parents[1] / config
-    env = create_race_env(config_path=config_path, gui=True, random_gate_init=True, rank=0)
+    env = create_race_env(config_path=config_path, gui=True, random_gate_init=False, rank=0)
     check_env(env)  # Sanity check to ensure the environment conforms to the sb3 API
+    
+    setup_test_logger('drone_rl')
 
     # load the model
     model = PPO.load(checkpoint_path, env=env)
