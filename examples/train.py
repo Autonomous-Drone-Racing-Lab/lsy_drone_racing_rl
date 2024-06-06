@@ -21,14 +21,13 @@ from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
 
 from lsy_drone_racing.constants import FIRMWARE_FREQ
 from lsy_drone_racing.utils import load_config
-from lsy_drone_racing.utils.logging import setup_log
+#from lsy_drone_racing.utils.logging import setup_log
 from lsy_drone_racing.wrapper import DroneRacingWrapper
 from safe_control_gym.envs.env_wrappers.vectorized_env import make_vec_envs
 from stable_baselines3.common.vec_env.vec_monitor import VecMonitor
 import json
 #from safe_control_gym.envs.env_wrappers.vectorized_env import SubprocVecEnv
 
-logger = logging.getLogger(__name__)
 import os
 
 def create_experiment_log_folder(logs_dir, experiment_name):
@@ -87,14 +86,14 @@ def create_race_env(config_path: Path, rank=0, random_gate_init: bool=False, gui
     
 def make_env(config_path: Path, rank: int):
     def _init():
-        env = create_race_env(config_path=config_path, rank=rank, gui=False, random_gate_init=False)
+        env = create_race_env(config_path=config_path, rank=rank, gui=False, random_gate_init=True)
         return env
     return _init
 
 
 def main(checkpoint=None, config: str = "config/getting_started.yaml", gui: bool = False):
     """Create the environment, check its compatibility with sb3, and run a PPO agent."""
-    logging.basicConfig(level=logging.INFO)
+    #logging.basicConfig(level=logging.INFO)
     config_path = Path(__file__).resolve().parents[1] / config
     config = load_config(config_path)
     #env = create_race_env(config_path=config_path, gui=True, random_gate_init=False)
@@ -107,7 +106,7 @@ def main(checkpoint=None, config: str = "config/getting_started.yaml", gui: bool
 
     # Setup logging
     config.log_config.log_file = os.path.join(logs_dir, "log.log")
-    setup_log('drone_rl', config.log_config)
+    #setup_log('drone_rl', config.log_config)
 
     # Dump config
     dump = json.dumps(config, indent=4)

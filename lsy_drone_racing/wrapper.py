@@ -32,7 +32,6 @@ from lsy_drone_racing.state_estimator import StateEstimator
 from lsy_drone_racing.utils.logging import get_logger
 from lsy_drone_racing.utils.rewards import distance_reward, progress_reward, smooth_action_reward
 
-import sys
 logger = get_logger("drone_rl")
 
 
@@ -64,10 +63,12 @@ class DroneRacingWrapper(Wrapper):
         # Action space
         self.action_space_wrapper = action_space_wrapper_factory(config)
         self.action_space = self.action_space_wrapper.get_action_space()
+        # logger.debug(f"Action space: {self.action_space}")
 
         # Observation space provided by environment transformation
         self.observation_space_wrapper = observation_space_wrapper_factory(config)
         self.observation_space = self.observation_space_wrapper.get_observation_space()
+        # logger.debug(f"Observation space: {self.observation_space}")
 
         self.pyb_client_id: int = env.env.PYB_CLIENT
         # Config and helper flags
@@ -140,7 +141,6 @@ class DroneRacingWrapper(Wrapper):
 
         self.no_gates_passed = 0
         self.last_gate_to_pass_id = obs[5]
-        self.passed_gate_countdown_timer = None
        
         return transformed_obs, self.info_transform(info)
 
@@ -158,7 +158,7 @@ class DroneRacingWrapper(Wrapper):
             # Wrapper has a reduced action space compared to the firmware env to make it compatible
             # with the gymnasium interface and popular RL libraries.
             raise InvalidAction(f"Invalid action: {action}")
-        action = self.action_space_wrapper.scale_action(action)
+        action = self.action_space_wrapper.scale_action(action, self.prev_drone_pose)
         # The firmware does not use the action input in the step function
         zeros = np.zeros(3)
         self.env.sendFullStateCmd(action[:3], zeros, zeros, action[3], zeros, self._sim_time)
@@ -173,48 +173,47 @@ class DroneRacingWrapper(Wrapper):
         estimated_velocity, estimated_acceleration = self.state_estimator.estimate_state()
         kwargs = {"estimated_velocity": estimated_velocity, "estimated_acceleration": estimated_acceleration}
         transformed_obs = self.observation_space_wrapper.transform_observation(obs, **kwargs)
-        
         # We set truncated to True if the task is completed but the drone has not yet passed the
         # final gate. We set terminated to True if the task is completed and the drone has passed
         # the final gate.
         terminated, truncated = False, False 
         if info["task_completed"] and info["current_gate_id"] != -1:
-            logger.debug("Task completed, but last gate not passed, i.e. truncated")
+            logger.debug("Task completed, but last gate not passed")
             truncated = True
         elif self.terminate_on_lap and info["current_gate_id"] == -1:
             logger.debug("Task completed, i.e. terminated")
             info["task_completed"] = True
             terminated = True
         elif self.terminate_on_lap and done:  # Done, but last gate not passed -> terminate
-            logger.debug("Task not completed, but done, i.e. terminated (probably time out)")
+            # logger.debug("Task not completed, but done, i.e. terminated (probably time out)")
             terminated = True
-        # Increment the sim time after the step if we are not yet done.
-        if not terminated and not truncated:
-            self._sim_time += self.env.ctrl_dt
-
-       
         
         # Get the reward
         current_drone_pose = obs[0]
         next_gate_id = obs[5]
         next_gate_pose_world = obs[1][next_gate_id]
         progress_reward_value = progress_reward(current_drone_pose, self.prev_drone_pose, next_gate_pose_world)
+        #print(f"Target gate position {next_gate_pose_world}, prev drone pose {self.prev_drone_pose}, current drone pose {current_drone_pose}, progress reward {progress_reward_value}")
 
         # Terminations
         col_id, did_collide = info["collision"]
         has_error = info["has_error"]
+        
         termination_penalty = 0
         if has_error:
             logger.debug("Drone tumbling, aborting")
+            #print(f"Drone tubling, aborting")
             assert terminated
             termination_penalty = -1
            # print("Added extra punishement, i.e. because of tumbling")
         elif did_collide:
             logger.debug(f"Drone collided with gate {col_id}, aborting")
+            #print(f"Drone collided with gate {col_id}, aborting")
             assert terminated
             termination_penalty = -1
             #print("Added extra punishement, i.e. because of collision")
         elif transformed_obs not in self.observation_space:
+            # print(f"Drone out of bounds at pos {transformed_obs}, aborting")
             logger.debug(f"Drone out of bounds at pos {transformed_obs}, aborting")
             termination_penalty = -1
             terminated = True
@@ -239,11 +238,10 @@ class DroneRacingWrapper(Wrapper):
         #         gate_passed_reward = 1
         #         self.passed_gate_countdown_timer = None
         
-        current_gate_id = obs[5]
         gate_passed_reward = 0
-        if current_gate_id != self.last_gate_to_pass_id:
+        if next_gate_id != self.last_gate_to_pass_id:
             self.no_gates_passed += 1
-            self.last_gate_to_pass_id = current_gate_id
+            self.last_gate_to_pass_id = next_gate_id
             gate_passed_reward = 1
 
         # Reward calculation
@@ -251,6 +249,7 @@ class DroneRacingWrapper(Wrapper):
         lambda_termination = self.config.rl_config.lambda_termination
         lambda_gate_passed = self.config.rl_config.lambda_gate_passed
         reward = lambda_progress * progress_reward_value + lambda_termination * termination_penalty + lambda_gate_passed * gate_passed_reward
+        # print(f"Progress reward {progress_reward_value}, termination penalty {termination_penalty}, gate passed reward {gate_passed_reward}, total reward {reward}")
 
         self._reset_required = terminated or truncated
         
@@ -258,7 +257,9 @@ class DroneRacingWrapper(Wrapper):
         self.prev_drone_pose = current_drone_pose
         self.prev_action = action
 
-        
+        # Increment the sim time after the step if we are not yet done.
+        if not terminated and not truncated:
+            self._sim_time += self.env.ctrl_dt
 
         return transformed_obs, reward, terminated, truncated, self.info_transform(info)
 

@@ -50,7 +50,7 @@ def create_race_env(config_path: Path, rank=0, random_gate_init: bool=False, gui
 
 def main(checkpoint_path:str, config: str = "config/getting_started.yaml"):
     config_path = Path(__file__).resolve().parents[1] / config
-    env = create_race_env(config_path=config_path, gui=True, random_gate_init=False, rank=0)
+    env = create_race_env(config_path=config_path, gui=True, random_gate_init=True, rank=0)
     check_env(env)  # Sanity check to ensure the environment conforms to the sb3 API
     
     setup_test_logger('drone_rl')
@@ -58,6 +58,7 @@ def main(checkpoint_path:str, config: str = "config/getting_started.yaml"):
     # load the model
     model = PPO.load(checkpoint_path, env=env)
     mean_reward, std_reward = evaluate_policy(model, model.get_env(), n_eval_episodes=10)
+    print(f"mean_reward: {mean_reward:.2f} +/- {std_reward:.2f}")
 
 if __name__ == "__main__":
     fire.Fire(main)
