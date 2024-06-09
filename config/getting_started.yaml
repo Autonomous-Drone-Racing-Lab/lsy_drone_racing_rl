@@ -7,30 +7,35 @@ verbose: True # Boolean passed to the Controller class, can be used to turn on a
 # Thus, only scenarios that meet these constraints are suitable for sim2real experiments
 
 log_config:
-  exp_name: final_config # Experiment name
+  exp_name: flight_obstacles # Experiment name
   log_dir: "./logs"
   log_level: INFO
   log_terminal: False
 
 rl_config:
   action_space: xyz_relative # Action space, can be xyz, xyz_yaw
-  observation_space: relative_all_goals # relative_only_next_goal, absolute_all_goals
+  observation_space: relative_all_goals_all_obstacles_no_acc # relative_only_next_goal, absolute_all_goals
   action_bound: 1
   world_lower_bound: [-4, -4, 0]
   world_upper_bound: [4, 4, 2]
-  vel_bound: 5
-  acc_bound: 5
+  desirable_vel_bound: 5
+  vel_bound: 7
 
   # Reward fuction
   lambda_progress: 3
   lambda_termination: 1
   lambda_gate_passed: 3
+  delay_gate_passed_reward: 3
+  lambda_velocity_limit: 2
+
+  # State Estimation
+  state_estimator_buffer_size: 5
 
 
 # Environment
 quadrotor_config:
   seed: 1337 # Random seed
-  reseed_on_reset: True # Whether to re-seed the random number generator between episodes
+  reseed_on_reset: False # Whether to re-seed the random number generator between episodes
   gui: True # Whether to spawn PyBullet's GUI
   camera_view: [5, -40, -40, 0.5, -1, 0.5] # Distance, yaw, pitch, x, y, z target position
 
@@ -70,18 +75,18 @@ quadrotor_config:
       [0.45, -1.0, 0, 0, 0, 2.35, 1],
       [1.0, -1.55, 0, 0, 0, -0.78, 0],
       [0.0, 0.5, 0, 0, 0, 0, 1],
-      #[-0.5, -0.5, 0, 0, 0, 3.14, 0]
+      [-0.5, -0.5, 0, 0, 0, 3.14, 0]
     ]
   obstacles:
     [  # x, y, z, r, p, y
-       [-2.0, -2.0, 0, 0, 0, 0],
-      # [0.5, -1.5, 0, 0, 0, 0],
-      # [-0.5, 0, 0, 0, 0, 0],
-      # [0, 1.0, 0, 0, 0, 0]
+      [1.0, -0.5, 0, 0, 0, 0],
+      [0.5, -1.5, 0, 0, 0, 0],
+      [-0.5, 0, 0, 0, 0, 0],
+      [0, 1.0, 0, 0, 0, 0]
     ]
 
   # Randomization of the initial state
-  randomized_init: False
+  randomized_init: True
   init_state_randomization_info:
     init_x: 
       distrib: "uniform"
@@ -94,7 +99,7 @@ quadrotor_config:
     init_z:
       distrib: "uniform"
       low: 0.0
-      high: 0.00
+      high: 0.02
     init_phi:
       distrib: "uniform"
       low: -0.1
@@ -109,7 +114,7 @@ quadrotor_config:
       high: 0.1
 
   # Randomization of the quadrotor inertial properties
-  randomized_inertial_prop: False
+  randomized_inertial_prop: True
   inertial_prop_randomization_info:
     M:
       distrib: "uniform"
@@ -133,12 +138,12 @@ quadrotor_config:
   gates_and_obstacles_randomization_info:
     gates:
       distrib: "uniform"
-      low: -0.2
-      high: 0.2
+      low: -0.15
+      high: 0.15
     obstacles:
       distrib: "uniform"
-      low: -0.2
-      high: 0.2
+      low: -0.15
+      high: 0.15
 
   # Constraints
   constraints:

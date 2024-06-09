@@ -29,8 +29,9 @@ from safe_control_gym.controllers.firmware.firmware_wrapper import FirmwareWrapp
 from lsy_drone_racing.action_space_wrapper import action_space_wrapper_factory
 from lsy_drone_racing.observation_space_wrapper import observation_space_wrapper_factory
 from lsy_drone_racing.state_estimator import StateEstimator
+from lsy_drone_racing.utils.delayed_reward import DelayedReward
 from lsy_drone_racing.utils.logging import get_logger
-from lsy_drone_racing.utils.rewards import distance_reward, progress_reward, smooth_action_reward
+from lsy_drone_racing.utils.rewards import distance_reward, progress_reward, smooth_action_reward, state_limits_exceeding_penalty
 
 logger = get_logger("drone_rl")
 
@@ -90,7 +91,9 @@ class DroneRacingWrapper(Wrapper):
         self.random_initialization = random_initialization
         self.no_gates = len(config.quadrotor_config["gates"])
         self.rng = np.random.default_rng()
-        self.state_estimator = StateEstimator(buffer_size=10) 
+        self.state_estimator = StateEstimator(self.config.rl_config.state_estimator_buffer_size) 
+        self.delayed_gate_reward = DelayedReward()
+
         
 
     @property
@@ -112,6 +115,7 @@ class DroneRacingWrapper(Wrapper):
         """
 
         if seed is not None:
+            logger.info("Setting seed of wrapper to %d", seed)
             self.rng = np.random.default_rng(seed)
 
 
@@ -141,6 +145,7 @@ class DroneRacingWrapper(Wrapper):
 
         self.no_gates_passed = 0
         self.last_gate_to_pass_id = obs[5]
+        self.delayed_gate_reward.reset()
        
         return transformed_obs, self.info_transform(info)
 
@@ -154,6 +159,9 @@ class DroneRacingWrapper(Wrapper):
             The next observation, the reward, the terminated and truncated flags, and the info dict.
         """
         assert not self._reset_required, "Environment must be reset before taking a step"
+        # Progress counter objects
+        self.delayed_gate_reward.step()
+        
         if action not in self.action_space:
             # Wrapper has a reduced action space compared to the firmware env to make it compatible
             # with the gymnasium interface and popular RL libraries.
@@ -202,23 +210,19 @@ class DroneRacingWrapper(Wrapper):
         termination_penalty = 0
         if has_error:
             logger.debug("Drone tumbling, aborting")
-            #print(f"Drone tubling, aborting")
             assert terminated
             termination_penalty = -1
-           # print("Added extra punishement, i.e. because of tumbling")
         elif did_collide:
             logger.debug(f"Drone collided with gate {col_id}, aborting")
-            #print(f"Drone collided with gate {col_id}, aborting")
             assert terminated
             termination_penalty = -1
-            #print("Added extra punishement, i.e. because of collision")
         elif transformed_obs not in self.observation_space:
-            # print(f"Drone out of bounds at pos {transformed_obs}, aborting")
             logger.debug(f"Drone out of bounds at pos {transformed_obs}, aborting")
             termination_penalty = -1
             terminated = True
-            #print(f"Added extra punishement, i.e. because of out of bounds, transformed obs: {transformed_obs}, pose {current_drone_pose}")
 
+
+        #! ToDo, reimplement. Also consider final goal, where we should give same reward
         # # gate passed reward
         # current_gate_id = obs[5]
         # gate_passed_reward = 0
@@ -238,17 +242,23 @@ class DroneRacingWrapper(Wrapper):
         #         gate_passed_reward = 1
         #         self.passed_gate_countdown_timer = None
         
-        gate_passed_reward = 0
         if next_gate_id != self.last_gate_to_pass_id:
-            self.no_gates_passed += 1
+            delay = self.config.rl_config.get("delay_gate_passed_reward", 0)
+            logger.debug(f"Drone passed gate {self.last_gate_to_pass_id}. Delaying reward for {delay} steps")
+            self.delayed_gate_reward.add_reward(1, delay)
             self.last_gate_to_pass_id = next_gate_id
-            gate_passed_reward = 1
+
+        
+    
+        velocity_limit_penalty = state_limits_exceeding_penalty(estimated_velocity, self.config.rl_config.desirable_vel_bound)
 
         # Reward calculation
         lambda_progress = self.config.rl_config.lambda_progress
         lambda_termination = self.config.rl_config.lambda_termination
         lambda_gate_passed = self.config.rl_config.lambda_gate_passed
-        reward = lambda_progress * progress_reward_value + lambda_termination * termination_penalty + lambda_gate_passed * gate_passed_reward
+    
+        lambda_velocity_limit = self.config.rl_config.lambda_velocity_limit
+        reward = lambda_progress * progress_reward_value + lambda_termination * termination_penalty + lambda_gate_passed * self.delayed_gate_reward.get_value(flush=terminated) + lambda_velocity_limit * velocity_limit_penalty
         # print(f"Progress reward {progress_reward_value}, termination penalty {termination_penalty}, gate passed reward {gate_passed_reward}, total reward {reward}")
 
         self._reset_required = terminated or truncated
@@ -263,22 +273,6 @@ class DroneRacingWrapper(Wrapper):
 
         return transformed_obs, reward, terminated, truncated, self.info_transform(info)
 
-    def _action_transform(self, action: np.ndarray) -> np.ndarray:
-        """Transform the action to the format expected by the firmware env.
-
-        Scale the action from [-1, 1] to [-5, 5] for the position and [-pi, pi] for the yaw.
-
-        Args:
-            action: The action to transform.
-
-        Returns:
-            The transformed action.
-        """
-        action_transform = np.zeros(14)
-        scaled_action = action * self.action_scale
-        action_transform[:3] = scaled_action[:3]
-        action_transform[9] = scaled_action[3]
-        return action_transform
 
     def render(self):
         """Render the environment.
@@ -318,11 +312,16 @@ class DroneRacingWrapper(Wrapper):
         drone_yaw = obs[8]
         drone_xyz_yaw = np.concatenate([drone_pos, [drone_yaw]])
 
+        obstacle_pose = info["obstacles_pose"][:, :3]
+        obstacle_pose_grounded = obstacle_pose.copy()
+        obstacle_pose_grounded[:, 2] = 0.0
+
         obs = [
             drone_xyz_yaw,
             info["gates_pose"][:, [0, 1, 2, 5]],
             info["gates_in_range"],
             info["obstacles_pose"][:, :3],
+            #obstacle_pose_grounded,
             info["obstacles_in_range"],
             info["current_gate_id"],
         ]
