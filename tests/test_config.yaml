@@ -7,7 +7,7 @@ verbose: True # Boolean passed to the Controller class, can be used to turn on a
 # Thus, only scenarios that meet these constraints are suitable for sim2real experiments
 
 log_config:
-  exp_name: flight_obstacles # Experiment name
+  exp_name: increase_env_complexity # Experiment name
   log_dir: "./logs"
   log_level: INFO
   log_terminal: False
@@ -34,7 +34,6 @@ rl_config:
   # Increase env complexity
   increase_env_complexity: true
   increase_gates_obstacles_randomization_step_size: 0.05
-  success_threshold: 0.7
 
 
 # Environment
@@ -137,18 +136,6 @@ quadrotor_config:
       distrib: "uniform"
       low: -0.000001
       high: 0.000001
-
-  # Randomization of the gates and obstacles positions
-  randomized_gates_and_obstacles: True
-  gates_and_obstacles_randomization_info:
-    gates:
-      distrib: "uniform"
-      low: -0.15
-      high: 0.15
-    obstacles:
-      distrib: "uniform"
-      low: -0.15
-      high: 0.15
 
   # Constraints
   constraints:

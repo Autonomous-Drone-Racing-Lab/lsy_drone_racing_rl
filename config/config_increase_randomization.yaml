@@ -7,7 +7,7 @@ verbose: True # Boolean passed to the Controller class, can be used to turn on a
 # Thus, only scenarios that meet these constraints are suitable for sim2real experiments
 
 log_config:
-  exp_name: flight_obstacles # Experiment name
+  exp_name: add_noise # Experiment name
   log_dir: "./logs"
   log_level: INFO
   log_terminal: False
@@ -103,8 +103,8 @@ quadrotor_config:
       high: 0.1
     init_z:
       distrib: "uniform"
-      low: 0.0
-      high: 0.02
+      low: -0.1
+      high: 0.1
     init_phi:
       distrib: "uniform"
       low: -0.1
@@ -137,18 +137,6 @@ quadrotor_config:
       distrib: "uniform"
       low: -0.000001
       high: 0.000001
-
-  # Randomization of the gates and obstacles positions
-  randomized_gates_and_obstacles: True
-  gates_and_obstacles_randomization_info:
-    gates:
-      distrib: "uniform"
-      low: -0.15
-      high: 0.15
-    obstacles:
-      distrib: "uniform"
-      low: -0.15
-      high: 0.15
 
   # Constraints
   constraints:

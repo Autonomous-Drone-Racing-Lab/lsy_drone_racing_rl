@@ -11,13 +11,28 @@ from stable_baselines3.common.env_checker import check_env
 
 from lsy_drone_racing.constants import FIRMWARE_FREQ
 from lsy_drone_racing.utils import load_config
-#from lsy_drone_racing.utils.logging import setup_log
 from lsy_drone_racing.utils.logging import setup_log
+
+# At top to prevent cirular import
+def save_config_to_file(config):
+    log_dir = config.log_config.log_dir
+    config_path = os.path.join(log_dir, "config.yaml")
+
+    with open(config_path, "w") as f:
+        def represent_flows_as_list(dumper, data):
+            return dumper.represent_sequence('tag:yaml.org,2002:seq', data, flow_style=True)
+
+        def represent_blocks_as_dict(dumper, data):
+            return dumper.represent_mapping('tag:yaml.org,2002:map', data, flow_style=False)
+        class CustomDumper(yaml.SafeDumper):
+            pass
+        CustomDumper.add_representer(list, represent_flows_as_list)
+        CustomDumper.add_representer(dict, represent_blocks_as_dict)
+        #print(config.rl_config)
+        yaml.dump(config, f, sort_keys=False, default_flow_style=False, Dumper=CustomDumper)
+
 from lsy_drone_racing.wrapper import DroneRacingWrapper
-
-
 import yaml
-
 def create_experiment_log_folder(logs_dir, experiment_name):
     """
     Creates a log directory for an experiment with an incrementing index.
@@ -50,7 +65,8 @@ def create_experiment_log_folder(logs_dir, experiment_name):
     
     return new_folder_path
 
-def create_race_env(config, rank=0, random_gate_init: bool=False, gui: bool = False) -> DroneRacingWrapper:
+def create_race_env(config, rank=0, random_gate_init: bool=False, gui: bool = False):
+    from lsy_drone_racing.wrapper import DroneRacingWrapper
     """Create the drone racing environment."""
     config = deepcopy(config) # deepcopy required because we will change argumens
     config.quadrotor_config.gui = gui
@@ -89,6 +105,8 @@ def resume_from_checkpoint(checkpoint_path: str):
 
     return config
 
+
+
 def start_from_scratch(config_path: Path):
     config_path = Path(config_path)
     assert config_path.exists(), f"Config {config_path} does not exist."
@@ -105,17 +123,5 @@ def start_from_scratch(config_path: Path):
     setup_log('drone_rl', config.log_config)    
 
     # Dump config
-    with open(os.path.join(logs_dir, "config.yaml"), "w") as f:
-        def represent_flows_as_list(dumper, data):
-            return dumper.represent_sequence('tag:yaml.org,2002:seq', data, flow_style=True)
-
-        def represent_blocks_as_dict(dumper, data):
-            return dumper.represent_mapping('tag:yaml.org,2002:map', data, flow_style=False)
-        class CustomDumper(yaml.SafeDumper):
-            pass
-        CustomDumper.add_representer(list, represent_flows_as_list)
-        CustomDumper.add_representer(dict, represent_blocks_as_dict)
-        #print(config.rl_config)
-        yaml.dump(config, f, sort_keys=False, default_flow_style=False, Dumper=CustomDumper)
-
+    save_config_to_file(config)
     return config

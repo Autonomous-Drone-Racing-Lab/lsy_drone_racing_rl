@@ -32,6 +32,8 @@ from lsy_drone_racing.state_estimator import StateEstimator
 from lsy_drone_racing.utils.delayed_reward import DelayedReward
 from lsy_drone_racing.utils.logging import get_logger
 from lsy_drone_racing.utils.rewards import distance_reward, progress_reward, smooth_action_reward, state_limits_exceeding_penalty
+from lsy_drone_racing.environment import save_config_to_file
+from munch import munchify
 
 logger = get_logger("drone_rl")
 
@@ -93,6 +95,7 @@ class DroneRacingWrapper(Wrapper):
         self.rng = np.random.default_rng()
         self.state_estimator = StateEstimator(self.config.rl_config.state_estimator_buffer_size) 
         self.delayed_gate_reward = DelayedReward()
+    
 
         
 
@@ -244,6 +247,7 @@ class DroneRacingWrapper(Wrapper):
         
         if next_gate_id != self.last_gate_to_pass_id:
             delay = self.config.rl_config.get("delay_gate_passed_reward", 0)
+            self.no_gates_passed += 1
             logger.debug(f"Drone passed gate {self.last_gate_to_pass_id}. Delaying reward for {delay} steps")
             self.delayed_gate_reward.add_reward(1, delay)
             self.last_gate_to_pass_id = next_gate_id
@@ -271,6 +275,8 @@ class DroneRacingWrapper(Wrapper):
         if not terminated and not truncated:
             self._sim_time += self.env.ctrl_dt
 
+        # Update info
+        info["no_gates_passed"] = self.no_gates_passed
         return transformed_obs, reward, terminated, truncated, self.info_transform(info)
 
 
@@ -312,10 +318,6 @@ class DroneRacingWrapper(Wrapper):
         drone_yaw = obs[8]
         drone_xyz_yaw = np.concatenate([drone_pos, [drone_yaw]])
 
-        obstacle_pose = info["obstacles_pose"][:, :3]
-        obstacle_pose_grounded = obstacle_pose.copy()
-        obstacle_pose_grounded[:, 2] = 0.0
-
         obs = [
             drone_xyz_yaw,
             info["gates_pose"][:, [0, 1, 2, 5]],
@@ -341,6 +343,80 @@ class DroneRacingWrapper(Wrapper):
             if type(value) in allowed_types:
                 transformed_info[key] = value
         return transformed_info
+
+    def increase_gates_obstacles_randomization(self):
+        logger.info("Increasing environment complexity")
+        
+        assert self.config.rl_config.increase_env_complexity, "Increase environment complexity must be set to True"
+        randomization_step_size = self.config.rl_config.increase_gates_obstacles_randomization_step_size
+        assert randomization_step_size > 0, "Randomization step size must be greater than 0"
+
+        control_gym_env = self.env.env
+        # get previous label from config
+        prev_gate_obstacle_randomization = self.config.quadrotor_config.get("gates_and_obstacles_randomization_info", None)
+        randomized_gates_and_obstacles = self.config.quadrotor_config.get("randomized_gates_and_obstacles", None)
+
+        if not randomized_gates_and_obstacles or prev_gate_obstacle_randomization is None:
+            gate_bound_high = randomization_step_size
+            obstacle_bound_high = randomization_step_size
+        else:
+
+            gate_bound_high = prev_gate_obstacle_randomization.gates.high
+            gate_bound_low = prev_gate_obstacle_randomization.gates.low
+            obstacle_bound_high = prev_gate_obstacle_randomization.obstacles.high
+            obstacle_bound_low = prev_gate_obstacle_randomization.obstacles.low
+            assert gate_bound_high == -gate_bound_low, "Gates must have symmetric bounds"
+            assert obstacle_bound_high == -obstacle_bound_low, "Obstacles must have symmetric bounds"
+
+            gate_bound_high += randomization_step_size
+            obstacle_bound_high += randomization_step_size
+
+        control_gym_env.set_gate_obstacle_randomization(gate_bound_high, obstacle_bound_high)
+
+        # update config
+        updated_randomization_info = {
+            "gates": {"high": gate_bound_high, "low": -gate_bound_high},
+            "obstacles": {"high": obstacle_bound_high, "low": -obstacle_bound_high},
+        }
+        self.config.quadrotor_config.gates_and_obstacles_randomization_info = munchify(updated_randomization_info)
+        self.config.quadrotor_config.randomized_gates_and_obstacles = True
+
+        # Save the updated config
+        save_config_to_file(self.config)
+
+    # def increase_start_pos_randomization(self):
+    #     logger.info("Increasing start position randomization")
+    #     control_gym_env = self.env.env
+    #     randomization_step_size = self.config.rl_config.increase_start_pos_randomization_step_size
+    #     assert randomization_step_size > 0, "Randomization step size must be greater than 0"
+
+    #     # get previous label from config
+    #     prev_start_pos_randomization = self.config.quadrotor_config.get("randomized_init", None)
+    #     randomized_start_pos = self.config.quadrotor_config.get("init_state_randomization_info", None)
+
+    #     if not randomized_start_pos or prev_start_pos_randomization is None:
+    #         start_pos_bound_high = randomization_step_size
+    #     else:
+    #         start_pos_bound_high = prev_start_pos_randomization.high
+    #         start_pos_bound_low = prev_start_pos_randomization.low
+    #         assert start_pos_bound_high == -start_pos_bound_low, "Start position must have symmetric bounds"
+    #         start_pos_bound_high += randomization_step_size
+
+    #     control_gym_env.set_start_pos_randomization(start_pos_bound_high)
+
+    #     # update config
+    #     updated_randomization_info = {
+    #         "high": start_pos_bound_high,
+    #         "low": -start_pos_bound_high,
+    #     }
+    #     self.config.quadrotor_config.start_pos_randomization = munchify(updated_randomization_info)
+    #     self.config.quadrotor_config.randomized_start_pos = True
+
+    #     # Save the updated config
+    #     save_config_to_file(self.config)
+    
+
+
 
 
 class DroneRacingObservationWrapper:
