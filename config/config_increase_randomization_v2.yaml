@@ -22,7 +22,7 @@ rl_config:
   vel_bound: 7
 
   # Reward fuction
-  lambda_progress: 3
+  lambda_progress: 4
   lambda_termination: 1
   lambda_gate_passed: 3
   delay_gate_passed_reward: 3
