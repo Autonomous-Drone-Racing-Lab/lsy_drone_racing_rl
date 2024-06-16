@@ -34,7 +34,10 @@ rl_config:
   # Increase env complexity
   increase_env_complexity: true
   increase_gates_obstacles_randomization_step_size: 0.05
+  increase_init_state_randomization_step_size: 0.02
   success_threshold: 0.7
+  env_complexity_stages: [[gate_obstacle], [init_state]]
+  env_complexity_cur_stage: 0
 
 
 # Environment
@@ -107,7 +110,7 @@ quadrotor_config:
       high: 0.02
 
   # Randomization of the quadrotor inertial properties
-  randomized_inertial_prop: False
+  randomized_inertial_prop: True
   inertial_prop_randomization_info:
     M:
       distrib: "uniform"

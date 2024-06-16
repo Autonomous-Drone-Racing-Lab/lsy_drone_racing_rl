@@ -12,9 +12,10 @@ class DelayedReward:
         """
         Add a reward to be given after a delay
         """
-        assert self.reward is None, "Reward already set"
-        assert self.delay is None, "Delay already set"
-    
+        if self.reward is not None or self.delay is not None:
+            print("Warning: Overwriting existing reward or delay")
+            print(f"Old reward: {self.reward}, old delay: {self.delay}")
+
         self.reward = reward
         self.delay = delay
     

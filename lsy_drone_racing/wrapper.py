@@ -30,12 +30,10 @@ from lsy_drone_racing.action_space_wrapper import action_space_wrapper_factory
 from lsy_drone_racing.observation_space_wrapper import observation_space_wrapper_factory
 from lsy_drone_racing.state_estimator import StateEstimator
 from lsy_drone_racing.utils.delayed_reward import DelayedReward
-from lsy_drone_racing.utils.logging import get_logger
-from lsy_drone_racing.utils.rewards import distance_reward, progress_reward, smooth_action_reward, state_limits_exceeding_penalty
+import logging
+from lsy_drone_racing.utils.rewards import  progress_reward, state_limits_exceeding_penalty
 from lsy_drone_racing.environment import save_config_to_file
 from munch import munchify
-
-logger = get_logger("drone_rl")
 
 
 class DroneRacingWrapper(Wrapper):
@@ -47,7 +45,7 @@ class DroneRacingWrapper(Wrapper):
 
     metadata = {"render_modes": ["human"]}
 
-    def __init__(self, env: FirmwareWrapper, config, random_initialization:bool = True, terminate_on_lap: bool = True):
+    def __init__(self, env: FirmwareWrapper, config, rank, is_train, random_initialization:bool = True, terminate_on_lap: bool = True):
         """Initialize the wrapper.
 
         Args:
@@ -66,12 +64,12 @@ class DroneRacingWrapper(Wrapper):
         # Action space
         self.action_space_wrapper = action_space_wrapper_factory(config)
         self.action_space = self.action_space_wrapper.get_action_space()
-        # logger.debug(f"Action space: {self.action_space}")
+        # self.logger.debug(f"Action space: {self.action_space}")
 
         # Observation space provided by environment transformation
         self.observation_space_wrapper = observation_space_wrapper_factory(config)
         self.observation_space = self.observation_space_wrapper.get_observation_space()
-        # logger.debug(f"Observation space: {self.observation_space}")
+        # self.logger.debug(f"Observation space: {self.observation_space}")
 
         self.pyb_client_id: int = env.env.PYB_CLIENT
         # Config and helper flags
@@ -87,6 +85,9 @@ class DroneRacingWrapper(Wrapper):
         # TODO: It is not clear if the rotor forces are even used in the firmware env. Initial tests
         #       suggest otherwise.
         self._f_rotors = np.zeros(4)
+        self.rank = rank
+        self.is_train = is_train
+        self.logger = logging.getLogger("drone_rl")
 
 
         # Custom by me extra values we must keep track of because they are only available in the initial info dict
@@ -94,8 +95,7 @@ class DroneRacingWrapper(Wrapper):
         self.no_gates = len(config.quadrotor_config["gates"])
         self.rng = np.random.default_rng()
         self.state_estimator = StateEstimator(self.config.rl_config.state_estimator_buffer_size) 
-        self.delayed_gate_reward = DelayedReward()
-    
+        self.delayed_gate_reward = DelayedReward() 
 
         
 
@@ -118,7 +118,7 @@ class DroneRacingWrapper(Wrapper):
         """
 
         if seed is not None:
-            logger.info("Setting seed of wrapper to %d", seed)
+            self.logger.info("Setting seed of wrapper to %d", seed)
             self.rng = np.random.default_rng(seed)
 
 
@@ -189,14 +189,14 @@ class DroneRacingWrapper(Wrapper):
         # the final gate.
         terminated, truncated = False, False 
         if info["task_completed"] and info["current_gate_id"] != -1:
-            logger.debug("Task completed, but last gate not passed")
+            self.logger.debug("Task completed, but last gate not passed")
             truncated = True
         elif self.terminate_on_lap and info["current_gate_id"] == -1:
-            logger.debug("Task completed, i.e. terminated")
+            self.logger.debug("Task completed, i.e. terminated")
             info["task_completed"] = True
             terminated = True
         elif self.terminate_on_lap and done:  # Done, but last gate not passed -> terminate
-            # logger.debug("Task not completed, but done, i.e. terminated (probably time out)")
+            # self.logger.debug("Task not completed, but done, i.e. terminated (probably time out)")
             terminated = True
         
         # Get the reward
@@ -212,15 +212,15 @@ class DroneRacingWrapper(Wrapper):
         
         termination_penalty = 0
         if has_error:
-            logger.debug("Drone tumbling, aborting")
+            self.logger.debug("Drone tumbling, aborting")
             assert terminated
             termination_penalty = -1
         elif did_collide:
-            logger.debug(f"Drone collided with gate {col_id}, aborting")
+            self.logger.debug(f"Drone collided with gate {col_id}, aborting")
             assert terminated
             termination_penalty = -1
         elif transformed_obs not in self.observation_space:
-            logger.debug(f"Drone out of bounds at pos {transformed_obs}, aborting")
+            self.logger.debug(f"Drone out of bounds at pos {transformed_obs}, aborting")
             termination_penalty = -1
             terminated = True
 
@@ -232,7 +232,7 @@ class DroneRacingWrapper(Wrapper):
         # if current_gate_id != self.last_gate_to_pass_id:
         #     assert self.passed_gate_countdown_timer is None, "Countdown timer must be None"
         #     COUNTDOWN_TIMER_LENTGH = 1
-        #     logger.debug(f"Drone passed gate {self.last_gate_to_pass_id}. Initializing countdoen timwer")
+        #     self.logger.debug(f"Drone passed gate {self.last_gate_to_pass_id}. Initializing countdoen timwer")
         #     self.no_gates_passed += 1
         #     self.last_gate_to_pass_id = current_gate_id
         #     self.passed_gate_countdown_timer = COUNTDOWN_TIMER_LENTGH
@@ -241,14 +241,14 @@ class DroneRacingWrapper(Wrapper):
         # if not terminated and self.passed_gate_countdown_timer is not None:
         #     self.passed_gate_countdown_timer -= 1
         #     if self.passed_gate_countdown_timer == 0:
-        #         logger.debug(f"Countfown timer finished, gate pass rewarded")
+        #         self.logger.debug(f"Countfown timer finished, gate pass rewarded")
         #         gate_passed_reward = 1
         #         self.passed_gate_countdown_timer = None
         
         if next_gate_id != self.last_gate_to_pass_id:
             delay = self.config.rl_config.get("delay_gate_passed_reward", 0)
             self.no_gates_passed += 1
-            logger.debug(f"Drone passed gate {self.last_gate_to_pass_id}. Delaying reward for {delay} steps")
+            self.logger.debug(f"Drone passed gate {self.last_gate_to_pass_id}. Delaying reward for {delay} steps")
             self.delayed_gate_reward.add_reward(1, delay)
             self.last_gate_to_pass_id = next_gate_id
 
@@ -260,9 +260,10 @@ class DroneRacingWrapper(Wrapper):
         lambda_progress = self.config.rl_config.lambda_progress
         lambda_termination = self.config.rl_config.lambda_termination
         lambda_gate_passed = self.config.rl_config.lambda_gate_passed
-    
         lambda_velocity_limit = self.config.rl_config.lambda_velocity_limit
-        reward = lambda_progress * progress_reward_value + lambda_termination * termination_penalty + lambda_gate_passed * self.delayed_gate_reward.get_value(flush=terminated) + lambda_velocity_limit * velocity_limit_penalty
+
+        flush_reward = info["task_completed"] and info["current_gate_id"] == -1
+        reward = lambda_progress * progress_reward_value + lambda_termination * termination_penalty + lambda_gate_passed * self.delayed_gate_reward.get_value(flush=flush_reward) + lambda_velocity_limit * velocity_limit_penalty
         # print(f"Progress reward {progress_reward_value}, termination penalty {termination_penalty}, gate passed reward {gate_passed_reward}, total reward {reward}")
 
         self._reset_required = terminated or truncated
@@ -343,10 +344,26 @@ class DroneRacingWrapper(Wrapper):
             if type(value) in allowed_types:
                 transformed_info[key] = value
         return transformed_info
+    
+    def increase_env_complexity(self):
+        assert self.config.rl_config.increase_env_complexity, "Increase environment complexity must be set to True"
+        assert self.config.rl_config.env_complexity_stages, "Env complexity stages must be set"
+        env_complexity_cur_stage = self.config.rl_config.get("env_complexity_cur_stage", 0)
+        stage = self.config.rl_config.env_complexity_stages[env_complexity_cur_stage]
+        for func_str in stage:
+            if func_str == "gate_obstacle":
+                self.increase_gates_obstacles_randomization()
+            elif func_str == "init_state":
+                self.increase_init_state_randomization()
+            else:
+                raise ValueError(f"Unknown function {func_str} in env complexity stage {env_complexity_cur_stage}")
+        self.config.rl_config.env_complexity_cur_stage = (env_complexity_cur_stage + 1) % len(self.config.rl_config.env_complexity_stages)
+        if self.rank == 0 and self.is_train:
+            save_config_to_file(self.config)
 
     def increase_gates_obstacles_randomization(self):
-        logger.info("Increasing environment complexity")
-        
+        # Somehow, warning required here
+
         assert self.config.rl_config.increase_env_complexity, "Increase environment complexity must be set to True"
         randomization_step_size = self.config.rl_config.increase_gates_obstacles_randomization_step_size
         assert randomization_step_size > 0, "Randomization step size must be greater than 0"
@@ -380,44 +397,60 @@ class DroneRacingWrapper(Wrapper):
         }
         self.config.quadrotor_config.gates_and_obstacles_randomization_info = munchify(updated_randomization_info)
         self.config.quadrotor_config.randomized_gates_and_obstacles = True
+        print(f"This environment is rank {self.rank}.Increased randomization to: gates {gate_bound_high}, obstacles {obstacle_bound_high}")
 
         # Save the updated config
-        save_config_to_file(self.config)
+        if self.rank == 0 and self.is_train:
+            save_config_to_file(self.config)
 
-    # def increase_start_pos_randomization(self):
-    #     logger.info("Increasing start position randomization")
-    #     control_gym_env = self.env.env
-    #     randomization_step_size = self.config.rl_config.increase_start_pos_randomization_step_size
-    #     assert randomization_step_size > 0, "Randomization step size must be greater than 0"
+    def increase_init_state_randomization(self):
+        # Somehow, warning required here
 
-    #     # get previous label from config
-    #     prev_start_pos_randomization = self.config.quadrotor_config.get("randomized_init", None)
-    #     randomized_start_pos = self.config.quadrotor_config.get("init_state_randomization_info", None)
+        assert self.config.rl_config.increase_env_complexity, "Increase environment complexity must be set to True"
+        randomization_step_size = self.config.rl_config.increase_init_state_randomization_step_size
+        assert randomization_step_size > 0, "Randomization step size must be greater than 0"
 
-    #     if not randomized_start_pos or prev_start_pos_randomization is None:
-    #         start_pos_bound_high = randomization_step_size
-    #     else:
-    #         start_pos_bound_high = prev_start_pos_randomization.high
-    #         start_pos_bound_low = prev_start_pos_randomization.low
-    #         assert start_pos_bound_high == -start_pos_bound_low, "Start position must have symmetric bounds"
-    #         start_pos_bound_high += randomization_step_size
+        control_gym_env = self.env.env
+        # get previous label from config
+        prev_init_state_randomization = self.config.quadrotor_config.get("init_state_randomization_info", None)
+        randomized_init_state = self.config.quadrotor_config.get("randomized_init", None)
+        
+        if randomized_init_state:
+            try:
+                init_x_rand = prev_init_state_randomization.init_x.high
+            except:
+                init_x_rand = 0
+            try:
+                init_y_rand = prev_init_state_randomization.init_y.high
+            except:
+                init_y_rand = 0
+            try:
+                init_z_rand = prev_init_state_randomization.init_z.high
+            except:
+                init_z_rand = 0
+        else:
+            init_x_rand = 0
+            init_y_rand = 0
+            init_z_rand = 0
 
-    #     control_gym_env.set_start_pos_randomization(start_pos_bound_high)
+        init_x_rand = init_x_rand + randomization_step_size
+        init_y_rand = init_y_rand + randomization_step_size
+        init_z_rand = init_z_rand + randomization_step_size
+        control_gym_env.set_init_state_randomization(init_x_rand, init_y_rand, init_z_rand)
 
-    #     # update config
-    #     updated_randomization_info = {
-    #         "high": start_pos_bound_high,
-    #         "low": -start_pos_bound_high,
-    #     }
-    #     self.config.quadrotor_config.start_pos_randomization = munchify(updated_randomization_info)
-    #     self.config.quadrotor_config.randomized_start_pos = True
+        rand_info = {
+            "init_x": {"high": init_x_rand + randomization_step_size, "low": -init_x_rand - randomization_step_size, "distrib": "uniform"},
+            "init_y": {"high": init_y_rand + randomization_step_size, "low": -init_y_rand - randomization_step_size, "distrib": "uniform"},
+            "init_z": {"high": init_z_rand + randomization_step_size, "low": -init_z_rand - randomization_step_size, "distrib": "uniform"},
+        }
 
-    #     # Save the updated config
-    #     save_config_to_file(self.config)
+        self.config.quadrotor_config.init_state_randomization_info = munchify(rand_info)
+        self.config.quadrotor_config.randomized_init = True
+
+        # Save the updated config
+        if self.rank == 0 and self.is_train:
+            save_config_to_file(self.config)
     
-
-
-
 
 class DroneRacingObservationWrapper:
     """Wrapper to transform the observation space the firmware wrapper.

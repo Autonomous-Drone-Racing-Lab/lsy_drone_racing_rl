@@ -1,3 +1,4 @@
+import logging
 import os
 from abc import ABC
 import warnings
@@ -10,6 +11,8 @@ import numpy as np
 from lsy_drone_racing.utils.evaluate_policy import evaluate_policy
 from stable_baselines3.common.vec_env import VecEnv, sync_envs_normalization, DummyVecEnv
 from stable_baselines3.common.callbacks import  BaseCallback
+
+logger = logging.getLogger("drone_rl")
 
 class EvalCallbackIncreaseEnvComplexity(BaseCallback):
     """
@@ -57,14 +60,13 @@ class EvalCallbackIncreaseEnvComplexity(BaseCallback):
 
     def _on_step(self) -> bool:
 
-        if self.eval_freq > 0 and self.n_calls % self.eval_freq == 0:
+        if self.eval_freq > 0 and self.n_calls % self.eval_freq == 0:            
             episode_rewards, episode_lengths, no_gates_passed = evaluate_policy(
                 model=self.model,
                 env=self.eval_env,
                 n_eval_episodes=self.n_eval_episodes,
                 return_episode_rewards=True
             )
-
             mean_reward, std_reward = np.mean(episode_rewards), np.std(episode_rewards)
             mean_ep_length, std_ep_length = np.mean(episode_lengths), np.std(episode_lengths)
             mean_no_gates_passed = np.mean(no_gates_passed)
@@ -77,13 +79,14 @@ class EvalCallbackIncreaseEnvComplexity(BaseCallback):
             success_rate = no_succecces / self.n_eval_episodes
 
             if self.verbose > 0:
-                print("Eval num_timesteps={}, "
-                      "episode_reward={:.2f} +/- {:.2f}".format(self.num_timesteps, mean_reward, std_reward))
-                print("Episode length: {:.2f} +/- {:.2f}".format(mean_ep_length, std_ep_length))
-                print("No gates passed: {:.2f}".format(mean_no_gates_passed))
-                print("Success rate: {:.2f}".format(no_succecces / self.n_eval_episodes))
+                logger.info(f"Eval num_timesteps={self.num_timesteps}, ")
+                logger.info("Episode_reward={:.2f} +/- {:.2f}".format(self.num_timesteps, mean_reward, std_reward))
+                logger.info("Episode length: {:.2f} +/- {:.2f}".format(mean_ep_length, std_ep_length))
+                logger.info(f"No gates passed list: {no_gates_passed}")
+                logger.info(f"Success rate: {success_rate}")
             
             if success_rate > self.success_threshold:
-                print(f"Success rate of {success_rate} higher than threshold of {self.success_threshold}. Increasing environment complexity")
-                self.training_env.env_method("increase_gates_obstacles_randomization") 
+                logger.info(f"Success rate of {success_rate} higher than threshold of {self.success_threshold}. Increasing environment complexity")
+                self.eval_env.env_method("increase_env_complexity") # eval must also get harder
+                self.training_env.env_method("increase_env_complexity") 
         return True

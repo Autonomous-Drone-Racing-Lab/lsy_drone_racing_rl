@@ -14,6 +14,11 @@ def setup_log(log_name, log_config):
     if log_config.log_file:
         file_handler = logging.FileHandler(log_config.log_file)
         logger.addHandler(file_handler)
+
+    logger.debug("Testing looger debugs")
+    logger.info("Testing looger infos")
+    logger.warning("Testing looger warnings")
+    logger.error("Testing looger errors")
     
     return logger
 
@@ -23,6 +28,3 @@ def setup_test_logger(log_name):
     terminal_handler = logging.StreamHandler(sys.stdout)
     logger.addHandler(terminal_handler)
     return logger
-
-def get_logger(log_name):
-    return logging.getLogger(log_name)

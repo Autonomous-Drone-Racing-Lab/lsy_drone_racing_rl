@@ -5,6 +5,7 @@ Note:
 """
 
 from copy import deepcopy
+import logging
 from lsy_drone_racing.environment import resume_from_checkpoint, start_from_scratch, make_env, create_race_env
 from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
 from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
@@ -14,7 +15,6 @@ from stable_baselines3 import PPO
 import fire
 
 from lsy_drone_racing.utils.eval_callback_scale_environment_complexity import EvalCallbackIncreaseEnvComplexity
-from lsy_drone_racing.utils.logging import get_logger
 
 def main(checkpoint=None, config: str = "config/getting_started.yaml"):
     """Create the environment, check its compatibility with sb3, and run a PPO agent."""
@@ -41,23 +41,22 @@ def main(checkpoint=None, config: str = "config/getting_started.yaml"):
     checkpoint_callback = CheckpointCallback(save_freq=checkpoint_frequency_scaled, save_path=logs_dir,
                                              name_prefix='rl_model', verbose=2)
 
-
     if config.rl_config.increase_env_complexity:
         no_gates = len(config.quadrotor_config.gates)
         success_threshold = config.rl_config.success_threshold
-        eval_env = create_race_env(config, gui=False, random_gate_init=False)
+        eval_env = create_race_env(config, rank=0, is_train=False, gui=False, random_gate_init=False)
         eval_callback = EvalCallbackIncreaseEnvComplexity(eval_env, no_gates=no_gates,success_threshold=success_threshold,  n_eval_episodes=10, eval_freq=eval_frquency_scaled)
     else:
-        eval_env = create_race_env(config, gui=False, random_gate_init=False)
+        eval_env = create_race_env(config, rank=0, is_train=False, gui=False, random_gate_init=False)
         eval_callback = EvalCallback(eval_env, best_model_save_path=logs_dir, log_path=logs_dir,
                                   eval_freq=eval_frquency_scaled,
                                  deterministic=True, render=False)
     
     if checkpoint:
-        print(f"Init from checkpont {checkpoint}")
         model = PPO.load(checkpoint, envs, verbose=1, tensorboard_log=logs_dir)
     else:
         model = PPO("MlpPolicy", envs, verbose=1, tensorboard_log=logs_dir)
+
     model.learn(total_timesteps=20000000, callback=[checkpoint_callback, eval_callback], progress_bar=True)
 
 

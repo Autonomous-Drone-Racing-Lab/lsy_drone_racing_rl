@@ -5,16 +5,17 @@ from copy import deepcopy
 
 import os
 from safe_control_gym.utils.registration import make
-
 from stable_baselines3.common.env_checker import check_env
-
-
 from lsy_drone_racing.constants import FIRMWARE_FREQ
 from lsy_drone_racing.utils import load_config
 from lsy_drone_racing.utils.logging import setup_log
 
 # At top to prevent cirular import
 def save_config_to_file(config):
+    """
+    Utility function to save config to file in well formated order.
+    The save path is automatically deduced from the config itself.
+    """
     log_dir = config.log_config.log_dir
     config_path = os.path.join(log_dir, "config.yaml")
 
@@ -30,6 +31,10 @@ def save_config_to_file(config):
         CustomDumper.add_representer(dict, represent_blocks_as_dict)
         #print(config.rl_config)
         yaml.dump(config, f, sort_keys=False, default_flow_style=False, Dumper=CustomDumper)
+
+
+
+
 
 from lsy_drone_racing.wrapper import DroneRacingWrapper
 import yaml
@@ -65,7 +70,10 @@ def create_experiment_log_folder(logs_dir, experiment_name):
     
     return new_folder_path
 
-def create_race_env(config, rank=0, random_gate_init: bool=False, gui: bool = False):
+def create_race_env(config, rank, is_train:bool, random_gate_init: bool=False, gui: bool = False):
+    """
+    Create drone racing evnrionment based on the config.
+    """
     from lsy_drone_racing.wrapper import DroneRacingWrapper
     """Create the drone racing environment."""
     config = deepcopy(config) # deepcopy required because we will change argumens
@@ -79,20 +87,25 @@ def create_race_env(config, rank=0, random_gate_init: bool=False, gui: bool = Fa
     config.quadrotor_config["ctrl_freq"] = FIRMWARE_FREQ
     env_factory = partial(make, "quadrotor", **config.quadrotor_config)
     firmware_env = make("firmware", env_factory, FIRMWARE_FREQ, CTRL_FREQ)
-    env =  DroneRacingWrapper(firmware_env,config=config, terminate_on_lap=True, random_initialization=random_gate_init)
+    env =  DroneRacingWrapper(firmware_env, rank=rank, is_train=is_train, config=config, terminate_on_lap=True, random_initialization=random_gate_init)
     env.reset(seed=config.quadrotor_config.seed)
     check_env(env)
-    #print(f" env factory id {id(env)} firmware id {id(firmware_env)} env id {id(env)}, unwrap {unwrap} unwrap id {id(unwrap)}")
     return env
 
     
 def make_env(config, rank: int):
+    """
+    Utility funciton to generate randomized verctorized environments for training
+    """
     def _init():
-        env = create_race_env(config, rank=rank, gui=False, random_gate_init=True)
+        env = create_race_env(config, is_train=True, rank=rank, gui=False, random_gate_init=True)
         return env
     return _init
 
 def resume_from_checkpoint(checkpoint_path: str):
+    """
+    Resume training from checkpoint by loading the config and setting up logging.
+    """
     checkpoint_path = Path(checkpoint_path)
     assert checkpoint_path.exists(), f"Checkpoint {checkpoint_path} does not exist."
     config_path = checkpoint_path.parents[0] / "config.yaml"
@@ -105,9 +118,10 @@ def resume_from_checkpoint(checkpoint_path: str):
 
     return config
 
-
-
 def start_from_scratch(config_path: Path):
+    """
+    Start training from scratch. Load config and setup all experiment related folders.
+    """
     config_path = Path(config_path)
     assert config_path.exists(), f"Config {config_path} does not exist."
     config = load_config(config_path)
