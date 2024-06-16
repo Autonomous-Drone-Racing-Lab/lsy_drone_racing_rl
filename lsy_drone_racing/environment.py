@@ -79,7 +79,7 @@ def create_race_env(config, rank, is_train:bool, random_gate_init: bool=False, g
     assert config.use_firmware, "Firmware must be used for the competition."
     pyb_freq = config.quadrotor_config["pyb_freq"]
     assert pyb_freq % FIRMWARE_FREQ == 0, "pyb_freq must be a multiple of firmware freq"
-    config.quadrotor_config["ctrl_freq"] = FIRMWARE_FREQ
+    config.quadrotor_config["firmware_freq"] = FIRMWARE_FREQ
     env_factory = partial(make, "quadrotor", **config.quadrotor_config)
     firmware_env = make("firmware", env_factory, FIRMWARE_FREQ, CTRL_FREQ)
     env =  DroneRacingWrapper(firmware_env, rank=rank, is_train=is_train, config=config, terminate_on_lap=True, random_initialization=random_gate_init)

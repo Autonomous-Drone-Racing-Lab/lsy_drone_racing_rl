@@ -396,8 +396,8 @@ class DroneRacingWrapper(Wrapper):
 
         # update config
         updated_randomization_info = {
-            "gates": {"high": gate_bound_high, "low": -gate_bound_high},
-            "obstacles": {"high": obstacle_bound_high, "low": -obstacle_bound_high},
+            "gates": {"high": gate_bound_high, "low": -gate_bound_high, "distrib": "uniform"},
+            "obstacles": {"high": obstacle_bound_high, "low": -obstacle_bound_high, "distrib": "uniform"},
         }
         self.config.quadrotor_config.gates_and_obstacles_randomization_info = munchify(updated_randomization_info)
         self.config.quadrotor_config.randomized_gates_and_obstacles = True

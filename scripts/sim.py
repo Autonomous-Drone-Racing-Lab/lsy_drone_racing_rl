@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 
 def simulate(
     config: str = "config/level0.yaml",
-    checkpoint: str = "saved_configurations/add_noise_8/rl_model_5400000_steps.zip",
+    checkpoint: str = "saved_configurations/add_noise_7/rl_model_3200000_steps.zip",
     controller: str = "lsy_drone_racing/controller/rl_controller.py",
     n_runs: int = 1,
     gui: bool = True,
