@@ -7,7 +7,7 @@ verbose: True # Boolean passed to the Controller class, can be used to turn on a
 # Thus, only scenarios that meet these constraints are suitable for sim2real experiments
 
 log_config:
-  exp_name: add_noise # Experiment name
+  exp_name: add_noise_rand_inertials # Experiment name
   log_dir: "./logs"
   log_level: INFO
   log_terminal: True

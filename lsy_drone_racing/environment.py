@@ -32,11 +32,6 @@ def save_config_to_file(config):
         #print(config.rl_config)
         yaml.dump(config, f, sort_keys=False, default_flow_style=False, Dumper=CustomDumper)
 
-
-
-
-
-from lsy_drone_racing.wrapper import DroneRacingWrapper
 import yaml
 def create_experiment_log_folder(logs_dir, experiment_name):
     """

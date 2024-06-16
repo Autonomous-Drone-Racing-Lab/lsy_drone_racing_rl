@@ -151,6 +151,8 @@ class DroneRacingWrapper(Wrapper):
         self.delayed_gate_reward.reset()
        
         return transformed_obs, self.info_transform(info)
+    
+
 
     def step(self, action: np.ndarray) -> tuple[np.ndarray, float, bool, bool, dict]:
         """Take a step in the environment.
@@ -292,7 +294,8 @@ class DroneRacingWrapper(Wrapper):
         """
         assert self.pyb_client_id != -1, "PyBullet not initialized with active GUI"
 
-    def observation_transform(self, obs: np.ndarray, info: dict[str, Any]) -> np.ndarray:
+    @staticmethod
+    def observation_transform(obs: np.ndarray, info: dict[str, Any]) -> np.ndarray:
         """Transform the observation to include additional information.
 
         Args:
@@ -330,7 +333,8 @@ class DroneRacingWrapper(Wrapper):
         ]
         return obs
     
-    def info_transform(self, info: dict[str, Any]) -> dict[str, Any]:
+    @staticmethod
+    def info_transform(info: dict[str, Any]) -> dict[str, Any]:
         """
         Transform the info dict, strip all non-pickable information from it to support multitasking.
         This mainly means that we remove all casadi objects from the info dict.
@@ -338,7 +342,7 @@ class DroneRacingWrapper(Wrapper):
 
         For now until we know how to do that, only return keys where value is eithe rprimitive type, numpy array or dict
         """
-        allowed_types = [int, float, np.ndarray, dict, tuple]
+        allowed_types = [int, float, np.ndarray, dict, tuple, bool, str]
         transformed_info = {}
         for key, value in info.items():
             if type(value) in allowed_types:
@@ -517,6 +521,11 @@ class DroneRacingObservationWrapper:
         Returns:
             The transformed observation and the info dict.
         """
+
+        # check whether it 
+
+
         obs, reward, done, info, action = self.env.step(*args, **kwargs)
         obs = DroneRacingWrapper.observation_transform(obs, info)
+        info = DroneRacingWrapper.info_transform(info)
         return obs, reward, done, info, action

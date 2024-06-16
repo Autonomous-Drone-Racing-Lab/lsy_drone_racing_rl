@@ -34,12 +34,14 @@ def load_controller(path: Path) -> Type[BaseController]:
     sys.modules["controller"] = controller_module
     spec.loader.exec_module(controller_module)
     assert hasattr(controller_module, "Controller")
-    assert issubclass(controller_module.Controller, BaseController)
+    # assert issubclass(controller_module.Controller, BaseController)
 
     try:
         return controller_module.Controller
     except ImportError as e:
         raise e
+
+
 
 
 def load_config(path: Path) -> Munch:

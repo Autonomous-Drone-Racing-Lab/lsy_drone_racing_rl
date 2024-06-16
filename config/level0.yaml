@@ -12,6 +12,14 @@ verbose: True # Boolean passed to the Controller class, can be used to turn on a
 # Note: DSL's flyable/usable space in Toronto extends from -3 to +3 meters in x and y and 0 and 2 meters in z
 # Thus, only scenarios that meet these constraints are suitable for sim2real experiments
 
+
+rl_config:
+  action_space: xyz_relative # Action space, can be xyz, xyz_yaw
+  observation_space: relative_all_goals_all_obstacles_no_acc # relative_only_next_goal, absolute_all_goals
+  action_bound: 1
+  state_estimator_buffer_size: 5
+
+
 # Environment
 quadrotor_config:
   seed: 1337 # Random seed

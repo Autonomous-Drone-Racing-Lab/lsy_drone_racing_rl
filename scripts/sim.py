@@ -34,8 +34,9 @@ logger = logging.getLogger(__name__)
 
 
 def simulate(
-    config: str = "config/getting_started.yaml",
-    controller: str = "examples/controller.py",
+    config: str = "config/level0.yaml",
+    checkpoint: str = "saved_configurations/add_noise_8/rl_model_5400000_steps.zip",
+    controller: str = "lsy_drone_racing/controller/rl_controller.py",
     n_runs: int = 1,
     gui: bool = True,
     terminate_on_lap: bool = True,
@@ -95,7 +96,7 @@ def simulate(
         info["ctrl_freq"] = CTRL_FREQ
         lap_finished = False
         # obs = [x, x_dot, y, y_dot, z, z_dot, phi, theta, psi, p, q, r]
-        ctrl = ctrl_class(obs, info, verbose=config.verbose)
+        ctrl = ctrl_class(checkpoint, config)
         gui_timer = p.addUserDebugText(
             "", textPosition=[0, 0, 1], physicsClientId=env.pyb_client_id
         )
