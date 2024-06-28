@@ -1,0 +1,110 @@
+num_episodes: 3
+use_firmware: true
+verbose: true
+log_config:
+  exp_name: add_noise
+  log_dir: ./logs/add_noise_6
+  log_level: INFO
+  log_terminal: true
+  log_file: ./logs/add_noise_6/log.log
+rl_config:
+  action_space: xyz_relative
+  observation_space: relative_all_goals_all_obstacles_no_acc
+  action_bound: 1
+  world_lower_bound: [-4, -4, 0]
+  world_upper_bound: [4, 4, 2]
+  desirable_vel_bound: 5
+  vel_bound: 7
+  lambda_progress: 3
+  lambda_termination: 1
+  lambda_gate_passed: 3
+  delay_gate_passed_reward: 3
+  lambda_velocity_limit: 2
+  state_estimator_buffer_size: 5
+  increase_env_complexity: true
+  increase_gates_obstacles_randomization_step_size: 0.05
+  success_threshold: 0.7
+quadrotor_config:
+  seed: 1337
+  reseed_on_reset: false
+  gui: false
+  camera_view: [5, -40, -40, 0.5, -1, 0.5]
+  ctrl_freq: 30
+  pyb_freq: 500
+  episode_len_sec: 33
+  done_on_violation: false
+  done_on_completion: false
+  done_on_collision: true
+  cost: competition
+  task: stabilization
+  task_info:
+    stabilization_goal: [0, -1.5, 0.5]
+    stabilization_goal_tolerance: 0.15
+  init_state:
+    init_x: 1.0
+    init_x_dot: 0
+    init_y: 1.0
+    init_y_dot: 0
+    init_z: 0.5
+    init_z_dot: 0
+    init_phi: 0
+    init_theta: 0
+    init_psi: 0
+    init_p: 0
+    init_q: 0
+    init_r: 0
+  gates: [[0.45, -1.0, 0, 0, 0, 2.35, 1], [1.0, -1.55, 0, 0, 0, -0.78, 0], [0.0, 0.5,
+      0, 0, 0, 0, 1], [-0.5, -0.5, 0, 0, 0, 3.14, 0]]
+  obstacles: [[1.0, -0.5, 0, 0, 0, 0], [0.5, -1.5, 0, 0, 0, 0], [-0.5, 0, 0, 0, 0,
+      0], [0, 1.0, 0, 0, 0, 0]]
+  randomized_init: true
+  init_state_randomization_info:
+    init_x:
+      distrib: uniform
+      low: -0.02
+      high: 0.02
+    init_y:
+      distrib: uniform
+      low: -0.02
+      high: 0.02
+    init_z:
+      distrib: uniform
+      low: -0.02
+      high: 0.02
+  randomized_inertial_prop: false
+  inertial_prop_randomization_info:
+    M:
+      distrib: uniform
+      low: -0.01
+      high: 0.01
+    Ixx:
+      distrib: uniform
+      low: -1.0e-06
+      high: 1.0e-06
+    Iyy:
+      distrib: uniform
+      low: -1.0e-06
+      high: 1.0e-06
+    Izz:
+      distrib: uniform
+      low: -1.0e-06
+      high: 1.0e-06
+  constraints: [{constraint_form: default_constraint, constrained_variable: input},
+    {constraint_form: bounded_constraint, constrained_variable: state, active_dims: [
+        0, 2, 4], upper_bounds: [3, 3, 2], lower_bounds: [-3, -3, -0.1]}]
+  disturbances:
+    action: [{disturbance_func: white_noise, std: 0.001}]
+    dynamics: [{disturbance_func: uniform, low: [-0.1, -0.1, -0.1], high: [0.1, 0.1,
+          0.1]}]
+  quad_type: 3
+  info_in_reset: true
+  normalized_rl_action_space: false
+  done_on_out_of_bound: false
+  gates_and_obstacles_randomization_info:
+    gates:
+      high: 0.15000000000000002
+      low: -0.15000000000000002
+    obstacles:
+      high: 0.15000000000000002
+      low: -0.15000000000000002
+  randomized_gates_and_obstacles: true
