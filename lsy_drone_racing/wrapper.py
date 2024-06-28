@@ -147,8 +147,10 @@ class DroneRacingWrapper(Wrapper):
         self.prev_action = None
 
         self.no_gates_passed = 0
+        self.init_gate_id_offset = obs[5]
         self.last_gate_to_pass_id = obs[5]
         self.delayed_gate_reward.reset()
+        self.gate_passed_set = set()
        
         return transformed_obs, self.info_transform(info)
     
@@ -180,7 +182,7 @@ class DroneRacingWrapper(Wrapper):
         # interface. We automatically insert the sim time and reuse the last rotor forces.
         obs, _, done, info, f_rotors = self.env.step(self._sim_time, action=self._f_rotors)
         self._f_rotors[:] = f_rotors
-        obs = self.observation_transform(obs, info)
+        obs = self.observation_transform(obs, info, self.no_gates_passed + self.init_gate_id_offset)
         self.state_estimator.add_measurement(obs[0][:3], self._sim_time)
 
         estimated_velocity, estimated_acceleration = self.state_estimator.estimate_state()
@@ -248,11 +250,15 @@ class DroneRacingWrapper(Wrapper):
         #         self.passed_gate_countdown_timer = None
         
         if next_gate_id != self.last_gate_to_pass_id:
-            delay = self.config.rl_config.get("delay_gate_passed_reward", 0)
-            self.no_gates_passed += 1
-            self.logger.debug(f"Drone passed gate {self.last_gate_to_pass_id}. Delaying reward for {delay} steps")
-            self.delayed_gate_reward.add_reward(1, delay)
-            self.last_gate_to_pass_id = next_gate_id
+            if next_gate_id in self.gate_passed_set:
+                print(f"Double passing gate {next_gate_id}!")
+            else:
+                delay = self.config.rl_config.get("delay_gate_passed_reward", 0)
+                self.no_gates_passed += 1
+                self.logger.debug(f"Drone passed gate {self.last_gate_to_pass_id}. Delaying reward for {delay} steps")
+                self.delayed_gate_reward.add_reward(1, delay)
+                self.last_gate_to_pass_id = next_gate_id
+                self.gate_passed_set.add(next_gate_id)
 
         
     
@@ -279,7 +285,6 @@ class DroneRacingWrapper(Wrapper):
             self._sim_time += self.env.ctrl_dt
 
         # Update info
-        info["no_gates_passed"] = self.no_gates_passed
         return transformed_obs, reward, terminated, truncated, self.info_transform(info)
 
 
@@ -295,7 +300,7 @@ class DroneRacingWrapper(Wrapper):
         assert self.pyb_client_id != -1, "PyBullet not initialized with active GUI"
 
     @staticmethod
-    def observation_transform(obs: np.ndarray, info: dict[str, Any]) -> np.ndarray:
+    def observation_transform(obs: np.ndarray, info: dict[str, Any], no_gates_passed=None) -> np.ndarray:
         """Transform the observation to include additional information.
 
         Args:
@@ -321,6 +326,17 @@ class DroneRacingWrapper(Wrapper):
         drone_pos = obs[0:6:2]
         drone_yaw = obs[8]
         drone_xyz_yaw = np.concatenate([drone_pos, [drone_yaw]])
+        drone_pos = obs[0:6:2]
+        drone_yaw = obs[8]
+        drone_vel = obs[1:6:2]
+        drone_rpy = obs[6:9]
+        drone_ang_vel = obs[8:11]
+
+        # current gate id has some issues
+        # if no_gates_passed is not None:
+        #     current_gate_id = no_gates_passed
+        # else:
+        #     current_gate_id = info["current_gate_id"]
 
         obs = [
             drone_xyz_yaw,
@@ -330,6 +346,8 @@ class DroneRacingWrapper(Wrapper):
             #obstacle_pose_grounded,
             info["obstacles_in_range"],
             info["current_gate_id"],
+            drone_rpy,
+            drone_ang_vel,
         ]
         return obs
     

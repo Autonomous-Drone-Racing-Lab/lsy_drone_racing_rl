@@ -27,6 +27,8 @@ def action_space_wrapper_factory(config):
         return ActionSpaceWrapperXYZ(config)
     elif action_space == "xyz_relative":
         return ActionSpaceWrapperXYZRelative(config)
+    elif action_space == "xyz_relative_yaw":
+        return ActionSpaceWrapperXYZRelativeYaw(config)
     elif action_space == "xyz_yaw":
         return ActionSpaceWrapperXYZYaw(config)
     else:
@@ -67,6 +69,30 @@ class ActionSpaceWrapperXYZRelative(ActionSpaceWrapper):
     
     def get_action_space(self):
         action_limits = np.ones(3)
+        return Box(low=-action_limits, high=action_limits, dtype=np.float32)
+    
+class ActionSpaceWrapperXYZRelativeYaw(ActionSpaceWrapper):
+    def __init__(self, config):
+        super().__init__(config)
+    
+    def scale_action(self, action: np.ndarray, drone_pose):
+        assert action.shape == (4,), "Action must have 4 elements [x,y,z,yaw]."
+        assert drone_pose.shape == (4,), "Drone pose must have 4 elements."
+
+        scale_factor = self.config.rl_config.action_bound
+        scaled_xyz = action[0:3] * scale_factor
+        drone_xyz_shifted = drone_pose[0:3] + scaled_xyz
+
+        yaw = action[3] * np.pi
+        # apply yaw rotation relative to current rotation, i.e. add the yaw action to the current yaw
+        # however we need to make sure that the yaw is within the range of [-pi, pi]
+        yaw_shifted = drone_pose[3] + yaw
+        yaw_shifted = (yaw_shifted + np.pi) % (2 * np.pi) - np.pi # wrap yaw to [-pi, pi]
+
+        return np.concatenate([drone_xyz_shifted, [yaw_shifted]])
+    
+    def get_action_space(self):
+        action_limits = np.ones(4)
         return Box(low=-action_limits, high=action_limits, dtype=np.float32)
 
 class ActionSpaceWrapperXYZYaw(ActionSpaceWrapper):

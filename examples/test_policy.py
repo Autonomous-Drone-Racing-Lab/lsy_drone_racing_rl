@@ -19,11 +19,11 @@ from lsy_drone_racing.environment_tracking_wrapper import TrajectoryTrackingWrap
 from lsy_drone_racing.utils.logging import setup_test_logger
 from lsy_drone_racing.utils.visualization import visualize_trajectories
 
-def main(checkpoint_path:str, gui: bool = False, random_gate_init: bool = True, show_plot: bool = True):
-    print(f"Resuming from checkpoint {checkpoint_path}")
-    config = resume_from_checkpoint(checkpoint_path)
+def main(checkpoint:str, gui: bool = False, random_gate_init: bool = False, show_plot: bool = False):
+    print(f"Resuming from checkpoint {checkpoint}")
+    config = resume_from_checkpoint(checkpoint)
    
-    env = create_race_env(config, gui=gui, random_gate_init=random_gate_init, rank=0)
+    env = create_race_env(config, gui=gui, is_train=False, random_gate_init=random_gate_init, rank=0)
     
     tracked_trajectories = []
     def save_trajectory(trajectory):
@@ -33,7 +33,7 @@ def main(checkpoint_path:str, gui: bool = False, random_gate_init: bool = True, 
     setup_test_logger('drone_rl')
 
     # load the model
-    model = PPO.load(checkpoint_path, env=env)
+    model = PPO.load(checkpoint, env=env)
     mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=10)
     print(f"mean_reward: {mean_reward:.2f} +/- {std_reward:.2f}")
 

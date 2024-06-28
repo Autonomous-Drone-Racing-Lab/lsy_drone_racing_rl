@@ -29,7 +29,8 @@ def main(checkpoint=None, config: str = "config/getting_started.yaml"):
         config = start_from_scratch(config)
 
     num_processes = 4
-    envs = SubprocVecEnv([make_env(config, rank=i) for i in range(num_processes)])
+    random_init = config.rl_config.random_gate_init
+    envs = SubprocVecEnv([make_env(config, rank=i, random_init=random_init) for i in range(num_processes)])
     envs = VecMonitor(envs)
 
     eval_frequency = 50000

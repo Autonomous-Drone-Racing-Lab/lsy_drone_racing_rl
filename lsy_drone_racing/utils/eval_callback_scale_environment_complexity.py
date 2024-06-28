@@ -38,7 +38,8 @@ class EvalCallbackIncreaseEnvComplexity(BaseCallback):
                  n_eval_episodes: int = 5,
                  success_threshold: float = 0.7,
                  eval_freq: int = 10000,
-                 verbose: int = 1):
+                 verbose: int = 1,
+                 ):
         super().__init__(verbose=verbose)
         self.n_eval_episodes = n_eval_episodes
         self.eval_freq = eval_freq
@@ -79,11 +80,15 @@ class EvalCallbackIncreaseEnvComplexity(BaseCallback):
             success_rate = no_succecces / self.n_eval_episodes
 
             if self.verbose > 0:
-                logger.info(f"Eval num_timesteps={self.num_timesteps}, ")
-                logger.info("Episode_reward={:.2f} +/- {:.2f}".format(self.num_timesteps, mean_reward, std_reward))
-                logger.info("Episode length: {:.2f} +/- {:.2f}".format(mean_ep_length, std_ep_length))
+                logger.info(f"Eval num_timesteps={self.num_timesteps}")
+                logger.info(f"Episode_reward={mean_reward:.2f} +/- {std_reward:.2f}")
+                logger.info(f"Episode length: {mean_ep_length:.2f} +/- {std_ep_length:.2f}")
                 logger.info(f"No gates passed list: {no_gates_passed}")
                 logger.info(f"Success rate: {success_rate}")
+                self.logger.record("eval/mean_reward", float(mean_reward))
+                self.logger.record("eval/mean_ep_length", float(mean_ep_length))
+                self.logger.record("eval/mean_no_gates_passed", float(mean_no_gates_passed))
+                self.logger.record("eval/success_rate", float(success_rate))
             
             if success_rate > self.success_threshold:
                 logger.info(f"Success rate of {success_rate} higher than threshold of {self.success_threshold}. Increasing environment complexity")

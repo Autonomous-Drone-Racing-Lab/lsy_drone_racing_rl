@@ -34,10 +34,10 @@ logger = logging.getLogger(__name__)
 
 
 def simulate(
-    config: str = "config/level0.yaml",
-    checkpoint: str = "logs/add_noise_rand_inertials_1/rl_model_900000_steps.zip",
+    config: str = "logs/next_gate_rp_relative_vel_1/config.yaml",
+    checkpoint: str = "logs/next_gate_rp_relative_vel_1/rl_model_4500000_steps.zip",
     controller: str = "lsy_drone_racing/controller/rl_controller.py",
-    n_runs: int = 1,
+    n_runs: int = 10,
     gui: bool = True,
     terminate_on_lap: bool = True,
 ) -> list[float]:

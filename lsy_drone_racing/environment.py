@@ -91,12 +91,12 @@ def create_race_env(config, rank, is_train:bool, random_gate_init: bool=False, g
     check_env(env)
     return env
     
-def make_env(config, rank: int):
+def make_env(config, rank: int, random_init: bool = False):
     """
     Utility funciton to generate randomized verctorized environments for training
     """
     def _init():
-        env = create_race_env(config, is_train=True, rank=rank, gui=False, random_gate_init=True)
+        env = create_race_env(config, is_train=True, rank=rank, gui=False, random_gate_init=random_init)
         return env
     return _init
 
