@@ -34,11 +34,11 @@ logger = logging.getLogger(__name__)
 
 
 def simulate(
-    config: str = "logs/next_gate_rp_relative_vel_1/config.yaml",
-    checkpoint: str = "logs/next_gate_rp_relative_vel_1/rl_model_4500000_steps.zip",
+    config: str = "logs/next_gate_rp_relative_vel_2/config.yaml",
+    checkpoint: str = "logs/next_gate_rp_relative_vel_2/best_model.zip",
     controller: str = "lsy_drone_racing/controller/rl_controller.py",
     n_runs: int = 10,
-    gui: bool = True,
+    gui: bool = False,
     terminate_on_lap: bool = True,
 ) -> list[float]:
     """Evaluate the drone controller over multiple episodes.
@@ -57,6 +57,8 @@ def simulate(
     config = load_config(Path(config))
     # Overwrite config options
     config.quadrotor_config.gui = gui
+    init_pos = [config.quadrotor_config.init_state.init_x, config.quadrotor_config.init_state.init_y, config.quadrotor_config.init_state.init_z]
+    config.quadrotor_config.init_state.init_z = 0.05
     CTRL_FREQ = config.quadrotor_config["ctrl_freq"]
     CTRL_DT = 1 / CTRL_FREQ
 
@@ -96,7 +98,7 @@ def simulate(
         info["ctrl_freq"] = CTRL_FREQ
         lap_finished = False
         # obs = [x, x_dot, y, y_dot, z, z_dot, phi, theta, psi, p, q, r]
-        ctrl = ctrl_class(checkpoint, config)
+        ctrl = ctrl_class(checkpoint, config, init_pos)
         gui_timer = p.addUserDebugText(
             "", textPosition=[0, 0, 1], physicsClientId=env.pyb_client_id
         )

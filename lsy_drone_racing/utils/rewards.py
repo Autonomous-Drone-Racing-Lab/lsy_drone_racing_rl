@@ -42,6 +42,32 @@ def distance_reward(current_drone_pose, to_be_pos):
         reward = 1
 
     return reward / 10
+
+def safety_reward(current_drone_pose, next_gate_pose):
+    EDGE_LENGTH = 0.45
+    gate_center = next_gate_pose[:3]
+    dist_to_gate = np.linalg.norm(current_drone_pose[:3] - gate_center)
+
+    yaw_rot = next_gate_pose[3]
+    normal_x = -np.sin(yaw_rot)
+    normal_y = np.cos(yaw_rot)
+    normal_z = 0
+    normal = np.array([normal_x, normal_y, normal_z])
+    
+    # find drone distance to normal
+    p1 = gate_center
+    p2 = gate_center + normal
+    p3 = current_drone_pose[:3]
+
+    distance_to_normal = np.linalg.norm(np.cross(p2 - p1, p1 - p3)) / np.linalg.norm(p2 - p1)
+
+    max_dist = 0.1 # activate reward when drone is within 0.5m of the gate
+    f = max(0, 1 - distance_to_normal / max_dist)
+    v = max((1-f) * (EDGE_LENGTH / 6), 0.05)
+
+    reward = - (f**2) * (1- math.exp(- (0.5 * dist_to_gate**2) / v))
+    return reward
+
         
 
 if __name__ == "__main__":

@@ -17,11 +17,9 @@ class Controller():
     def __init__(
         self,
         checkpoint: str,
-        config
+        config,
+        init_pos: np.ndarray
     ):
-
-
-
         #########################
         # REPLACE THIS (START) ##
         #########################
@@ -31,18 +29,14 @@ class Controller():
         self.action_space_wrapper = action_space_wrapper_factory(config)
         self.model = PPO.load(checkpoint)
 
-
         self._take_off = False
         self._take_off_time = 0.5
         self._initialized = False
-        self._initialized_time = 2
+        self._initialized_time = 0
         self._setpoint_land = False
         self._land = False
 
-        _init_x = config.quadrotor_config.init_state.init_x
-        _init_y = config.quadrotor_config.init_state.init_y
-        _init_z = config.quadrotor_config.init_state.init_z
-        self._trained_start_pos = np.array([_init_x, _init_y, _init_z])
+        self._trained_start_pos = np.array(init_pos)
 
         # Reset counters and buffers.
         self.reset()

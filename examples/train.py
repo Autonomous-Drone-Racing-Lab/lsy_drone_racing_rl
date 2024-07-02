@@ -6,6 +6,7 @@ Note:
 
 from copy import deepcopy
 import logging
+from pathlib import Path
 from lsy_drone_racing.environment import resume_from_checkpoint, start_from_scratch, make_env, create_race_env
 from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
 from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
@@ -14,7 +15,9 @@ from safe_control_gym.envs.env_wrappers.vectorized_env import make_vec_envs
 from stable_baselines3 import PPO
 import fire
 
+from lsy_drone_racing.utils.eval_callback_count_gates_passed import EvalCallbackCountGatesPassed
 from lsy_drone_racing.utils.eval_callback_scale_environment_complexity import EvalCallbackIncreaseEnvComplexity
+from lsy_drone_racing.utils.utils import load_config
 
 def main(checkpoint=None, config: str = "config/getting_started.yaml"):
     """Create the environment, check its compatibility with sb3, and run a PPO agent."""
@@ -48,10 +51,14 @@ def main(checkpoint=None, config: str = "config/getting_started.yaml"):
         eval_env = create_race_env(config, rank=0, is_train=False, gui=False, random_gate_init=False)
         eval_callback = EvalCallbackIncreaseEnvComplexity(eval_env, no_gates=no_gates,success_threshold=success_threshold,  n_eval_episodes=10, eval_freq=eval_frquency_scaled)
     else:
-        eval_env = create_race_env(config, rank=0, is_train=False, gui=False, random_gate_init=False)
-        eval_callback = EvalCallback(eval_env, best_model_save_path=logs_dir, log_path=logs_dir,
-                                  eval_freq=eval_frquency_scaled,
-                                 deterministic=True, render=False)
+        eval_config = "config/level3_extra.yaml"
+        eval_config = load_config(Path(eval_config))
+        eval_env = create_race_env(eval_config, rank=0, is_train=False, gui=False, random_gate_init=False)
+        # eval_callback = EvalCallback(eval_env, best_model_save_path=logs_dir, log_path=logs_dir,
+        #                           eval_freq=eval_frquency_scaled,
+        #                          deterministic=True, render=False)
+        eval_callback = EvalCallbackCountGatesPassed(eval_env, n_eval_episodes=10, eval_freq=eval_frquency_scaled, 
+                                                     log_path=logs_dir, best_model_save_path=logs_dir, deterministic=True, render=False)
     
     if checkpoint:
         model = PPO.load(checkpoint, envs, verbose=1, tensorboard_log=logs_dir)

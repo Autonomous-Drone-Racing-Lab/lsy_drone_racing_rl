@@ -31,7 +31,7 @@ from lsy_drone_racing.observation_space_wrapper import observation_space_wrapper
 from lsy_drone_racing.state_estimator import StateEstimator
 from lsy_drone_racing.utils.delayed_reward import DelayedReward
 import logging
-from lsy_drone_racing.utils.rewards import  progress_reward, state_limits_exceeding_penalty
+from lsy_drone_racing.utils.rewards import  progress_reward, safety_reward, state_limits_exceeding_penalty
 from lsy_drone_racing.environment import save_config_to_file
 from munch import munchify
 
@@ -264,14 +264,17 @@ class DroneRacingWrapper(Wrapper):
     
         velocity_limit_penalty = state_limits_exceeding_penalty(estimated_velocity, self.config.rl_config.desirable_vel_bound)
 
+        safety_reward_value = safety_reward(current_drone_pose, next_gate_pose_world)
+
         # Reward calculation
         lambda_progress = self.config.rl_config.lambda_progress
         lambda_termination = self.config.rl_config.lambda_termination
         lambda_gate_passed = self.config.rl_config.lambda_gate_passed
         lambda_velocity_limit = self.config.rl_config.lambda_velocity_limit
+        lambda_safety = self.config.rl_config.get("lambda_safety", 0)
 
         flush_reward = info["task_completed"] and info["current_gate_id"] == -1
-        reward = lambda_progress * progress_reward_value + lambda_termination * termination_penalty + lambda_gate_passed * self.delayed_gate_reward.get_value(flush=flush_reward) + lambda_velocity_limit * velocity_limit_penalty
+        reward = lambda_progress * progress_reward_value + lambda_termination * termination_penalty + lambda_gate_passed * self.delayed_gate_reward.get_value(flush=flush_reward) + lambda_velocity_limit * velocity_limit_penalty + lambda_safety * safety_reward_value
         # print(f"Progress reward {progress_reward_value}, termination penalty {termination_penalty}, gate passed reward {gate_passed_reward}, total reward {reward}")
 
         self._reset_required = terminated or truncated
@@ -285,6 +288,7 @@ class DroneRacingWrapper(Wrapper):
             self._sim_time += self.env.ctrl_dt
 
         # Update info
+        info["no_gates_passed"] = self.no_gates_passed
         return transformed_obs, reward, terminated, truncated, self.info_transform(info)
 
 
