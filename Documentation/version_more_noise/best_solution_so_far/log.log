@@ -1,0 +1,42 @@
+Testing looger infos
+Testing looger warnings
+Testing looger errors
+Setting seed of wrapper to 1337
+Setting seed of wrapper to 0
+Testing looger infos
+Testing looger warnings
+Testing looger errors
+Setting seed of wrapper to 1337
+Setting seed of wrapper to 0
+Drone passed gate 0. Delaying reward for 3 steps
+Drone collided with gate 3, aborting
+Drone passed gate 0. Delaying reward for 3 steps
+Drone passed gate 1. Delaying reward for 3 steps
+Drone passed gate 2. Delaying reward for 3 steps
+Drone collided with gate 9, aborting
+Drone passed gate 0. Delaying reward for 3 steps
+Drone passed gate 1. Delaying reward for 3 steps
+Drone passed gate 2. Delaying reward for 3 steps
+Drone collided with gate 9, aborting
+Drone passed gate 0. Delaying reward for 3 steps
+Drone passed gate 1. Delaying reward for 3 steps
+Drone passed gate 2. Delaying reward for 3 steps
+Task completed, i.e. terminated
+Drone passed gate 3. Delaying reward for 3 steps
+Drone passed gate 0. Delaying reward for 3 steps
+Drone passed gate 1. Delaying reward for 3 steps
+Drone passed gate 2. Delaying reward for 3 steps
+Drone collided with gate 8, aborting
+Drone passed gate 0. Delaying reward for 3 steps
+Drone passed gate 1. Delaying reward for 3 steps
+Drone passed gate 2. Delaying reward for 3 steps
+Drone collided with gate 9, aborting
+Drone collided with gate 2, aborting
+Drone collided with gate 6, aborting
+Drone passed gate 0. Delaying reward for 3 steps
+Drone passed gate 1. Delaying reward for 3 steps
+Drone passed gate 2. Delaying reward for 3 steps
+Drone collided with gate 9, aborting
+Drone passed gate 0. Delaying reward for 3 steps
+Drone passed gate 1. Delaying reward for 3 steps
+Drone collided with gate 9, aborting
