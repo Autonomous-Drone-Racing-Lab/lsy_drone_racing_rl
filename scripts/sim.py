@@ -23,6 +23,7 @@ from safe_control_gym.utils.utils import sync
 
 from lsy_drone_racing.command import apply_sim_command
 from lsy_drone_racing.constants import FIRMWARE_FREQ
+from lsy_drone_racing.experiment_trakcer import ExperimentTracker
 from lsy_drone_racing.utils import load_config, load_controller
 from lsy_drone_racing.wrapper import DroneRacingObservationWrapper
 
@@ -87,8 +88,12 @@ def simulate(
     }
     ep_times = []
 
+    experiment_tracker = ExperimentTracker()
+
+
     # Run the episodes.
     for _ in range(n_runs):
+        experiment_tracker.add_experiment()
         ep_start = time.time()
         done = False
         action = np.zeros(4)
@@ -98,7 +103,7 @@ def simulate(
         info["ctrl_freq"] = CTRL_FREQ
         lap_finished = False
         # obs = [x, x_dot, y, y_dot, z, z_dot, phi, theta, psi, p, q, r]
-        ctrl = ctrl_class(checkpoint, config, init_pos)
+        ctrl = ctrl_class(checkpoint, config, init_pos, experiment_tracker)
         gui_timer = p.addUserDebugText(
             "", textPosition=[0, 0, 1], physicsClientId=env.pyb_client_id
         )
@@ -156,6 +161,8 @@ def simulate(
 
     # Close the environment
     env.close()
+    out_path = "experiments.pkl"
+    experiment_tracker.save_experiment(out_path)
     return ep_times
 
 

@@ -5,6 +5,7 @@ from scipy import interpolate
 
 from lsy_drone_racing.command import Command
 from lsy_drone_racing.action_space_wrapper import action_space_wrapper_factory
+from lsy_drone_racing.experiment_trakcer import ExperimentTracker
 from lsy_drone_racing.observation_space_wrapper import observation_space_wrapper_factory
 from lsy_drone_racing.state_estimator import StateEstimator
 import numpy as np
@@ -18,7 +19,8 @@ class Controller():
         self,
         checkpoint: str,
         config,
-        init_pos: np.ndarray
+        init_pos: np.ndarray,
+        experiment_tracker: ExperimentTracker = None
     ):
         #########################
         # REPLACE THIS (START) ##
@@ -28,9 +30,10 @@ class Controller():
         self.observation_space_wrapper = observation_space_wrapper_factory(config)
         self.action_space_wrapper = action_space_wrapper_factory(config)
         self.model = PPO.load(checkpoint)
+        self.experiment_tracker = experiment_tracker
 
         self._take_off = False
-        self._take_off_time = 0.5
+        self._take_off_time = 0.4
         self._initialized = False
         self._initialized_time = 0
         self._setpoint_land = False
@@ -77,6 +80,10 @@ class Controller():
         kwargs = {"estimated_velocity": estimated_velocity, "estimated_acceleration": estimated_acceleration}
         transformed_obs = self.observation_space_wrapper.transform_observation(obs, **kwargs)
         action, _ = self.model.predict(transformed_obs, deterministic=True)
+
+        if self.experiment_tracker is not None:
+            drone_pos = obs[0][:3]
+            self.experiment_tracker.add_drone_obs(drone_pos, ep_time)
 
         #########################
         # REPLACE THIS (START) ##

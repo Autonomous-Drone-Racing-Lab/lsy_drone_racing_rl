@@ -7,7 +7,7 @@ verbose: True # Boolean passed to the Controller class, can be used to turn on a
 # Thus, only scenarios that meet these constraints are suitable for sim2real experiments
 
 log_config:
-  exp_name: next_gate_rp_relative_vel_more_disturb_replicate # Experiment name
+  exp_name: next_gate_rp_relative_vel_more_disturb # Experiment name
   log_dir: "./logs"
   log_level: INFO
   log_terminal: False

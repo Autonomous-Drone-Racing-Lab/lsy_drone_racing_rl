@@ -3,3 +3,12 @@
 **/__pycache__/
 submission.csv
 logs
+
+logs/
+saved_configurations/
+
+*.zip
+*.npz
+
+
+!best_model.zip

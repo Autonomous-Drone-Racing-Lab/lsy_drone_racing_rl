@@ -61,7 +61,7 @@ def safety_reward(current_drone_pose, next_gate_pose):
 
     distance_to_normal = np.linalg.norm(np.cross(p2 - p1, p1 - p3)) / np.linalg.norm(p2 - p1)
 
-    max_dist = 0.1 # activate reward when drone is within 0.5m of the gate
+    max_dist = 0.10 # activate reward when drone is within 0.5m of the gate
     f = max(0, 1 - distance_to_normal / max_dist)
     v = max((1-f) * (EDGE_LENGTH / 6), 0.05)
 

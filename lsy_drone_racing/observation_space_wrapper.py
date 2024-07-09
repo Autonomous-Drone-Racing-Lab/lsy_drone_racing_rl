@@ -265,7 +265,8 @@ class ObservationSpaceWrapperRelativeAllGoalAllObstaclesRPRelativeVel(Obervation
             [0, 0, 1]
         ])
         vel_local_frame = (rot_matrix.T @ estimated_vel.reshape(3, 1)).flatten()
-        
+        #vel_local_frame  = estimated_vel.reshape(3,1).flatten()
+
         # Extract next gate to pass
         all_gate_corners = []
         for gate in gates_xyz_yaw:

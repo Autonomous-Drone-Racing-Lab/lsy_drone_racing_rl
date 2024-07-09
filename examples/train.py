@@ -51,9 +51,11 @@ def main(checkpoint=None, config: str = "config/getting_started.yaml"):
         eval_env = create_race_env(config, rank=0, is_train=False, gui=False, random_gate_init=False)
         eval_callback = EvalCallbackIncreaseEnvComplexity(eval_env, no_gates=no_gates,success_threshold=success_threshold,  n_eval_episodes=10, eval_freq=eval_frquency_scaled)
     else:
-        eval_config = "config/level3_extra.yaml"
+        eval_config = "config/level3.yaml"
         eval_config = load_config(Path(eval_config))
-        eval_env = create_race_env(eval_config, rank=0, is_train=False, gui=False, random_gate_init=False)
+        config_copy = deepcopy(config)
+        eval_config.rl_config = config_copy.rl_config
+        eval_env = create_race_env(config, rank=0, is_train=False, gui=False, random_gate_init=False)
         # eval_callback = EvalCallback(eval_env, best_model_save_path=logs_dir, log_path=logs_dir,
         #                           eval_freq=eval_frquency_scaled,
         #                          deterministic=True, render=False)

@@ -67,6 +67,29 @@ class ActionSpaceWrapperXYZRelative(ActionSpaceWrapper):
         scaled_space = np.concatenate([scaled_xyz, [0]])
         return drone_pose + scaled_space
     
+    # def scale_action(self, action: np.ndarray, drone_pose):
+    #     assert action.shape == (3,), "Action must have 3 elements."
+    #     assert drone_pose.shape == (4,), "Drone pose must have 4 elements."
+
+    #     scale_factor = self.config.rl_config.action_bound
+    #     drone_pos = drone_pose[:3]
+    #     yaw = drone_pose[3]
+        
+    #     rot_matrix = np.array([
+    #         [np.cos(yaw), -np.sin(yaw), 0],
+    #         [np.sin(yaw), np.cos(yaw), 0],
+    #         [0, 0, 1]
+    #     ])
+
+    #     action_global_frame = (rot_matrix @ action.reshape(-1, 1)).flatten()
+    #     scaled_xyz = action_global_frame * scale_factor
+    #     scaled_space = np.concatenate([scaled_xyz, [0]])
+    #     #print(scaled_space.shape)
+        
+
+    #     return drone_pose + scaled_space
+
+
     def get_action_space(self):
         action_limits = np.ones(3)
         return Box(low=-action_limits, high=action_limits, dtype=np.float32)
