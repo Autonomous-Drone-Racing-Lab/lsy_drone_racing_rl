@@ -2,7 +2,6 @@ from functools import partial
 from pathlib import Path
 import re
 from copy import deepcopy
-import math
 
 import os
 from safe_control_gym.utils.registration import make
@@ -72,9 +71,15 @@ def create_experiment_log_folder(logs_dir, experiment_name):
 def create_race_env(config, rank, is_train:bool, random_gate_init: bool=False, gui: bool = False):
     """
     Create drone racing evnrionment based on the config.
+
+    Args:
+    - config (Munch): The configuration object.
+    - rank (int): The rank of the environment.
+    - is_train (bool): Whether the environment is used for training or evaluation.
+    - random_gate_init (bool): Whether to randomize the start position of the drone (i.e. the start gate)
+    - gui (bool): Whether to show the GUI.
     """
     from lsy_drone_racing.wrapper import DroneRacingWrapper
-    """Create the drone racing environment."""
     config = deepcopy(config) # deepcopy required because we will change argumens
     config.quadrotor_config.gui = gui
     config.quadrotor_config.seed = config.quadrotor_config.seed + rank
@@ -94,6 +99,11 @@ def create_race_env(config, rank, is_train:bool, random_gate_init: bool=False, g
 def make_env(config, rank: int, random_init: bool = False):
     """
     Utility funciton to generate randomized verctorized environments for training
+
+    Args:
+    - config (Munch): The configuration object.
+    - rank (int): The rank of the environment.
+    - random_init (bool): Whether to randomize the start position of the drone (i.e. the start gate)
     """
     def _init():
         env = create_race_env(config, is_train=True, rank=rank, gui=False, random_gate_init=random_init)
@@ -103,6 +113,9 @@ def make_env(config, rank: int, random_init: bool = False):
 def resume_from_checkpoint(checkpoint_path: str):
     """
     Resume training from checkpoint by loading the config and setting up logging.
+
+    Args:
+    - checkpoint_path (str): The path to the checkpoint.
     """
     checkpoint_path = Path(checkpoint_path)
     assert checkpoint_path.exists(), f"Checkpoint {checkpoint_path} does not exist."
@@ -119,6 +132,9 @@ def resume_from_checkpoint(checkpoint_path: str):
 def start_from_scratch(config_path: Path):
     """
     Start training from scratch. Load config and setup all experiment related folders.
+
+    Args:
+    - config_path (Path): The path to the config file.
     """
     config_path = Path(config_path)
     assert config_path.exists(), f"Config {config_path} does not exist."

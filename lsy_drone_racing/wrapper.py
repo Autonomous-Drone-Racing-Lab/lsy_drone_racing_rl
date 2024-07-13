@@ -37,7 +37,8 @@ from munch import munchify
 
 
 class DroneRacingWrapper(Wrapper):
-    """Drone racing firmware wrapper to make the environment compatible with the gymnasium API.
+    """
+    Drone racing firmware wrapper to make the environment compatible with the gymnasium API.
 
     In contrast to the underlying environment, this wrapper only accepts FullState commands as
     actions.
@@ -50,7 +51,10 @@ class DroneRacingWrapper(Wrapper):
 
         Args:
             env: The firmware wrapper.
-            terminate_on_lap: Stop the simulation early when the drone has passed the last gate.
+            config: The configuration object.
+            is_train: Whether the environment is used for training or evaluation.
+            random_initialization: Whether to randomize the start position of the drone (i.e. the start gate)
+            terminate_on_lap: Whether to terminate the episode when the drone completes a lap.
         """
         if not isinstance(env, FirmwareWrapper):
             raise TypeError(f"`env` must be an instance of `FirmwareWrapper`, is {type(env)}")
@@ -64,12 +68,10 @@ class DroneRacingWrapper(Wrapper):
         # Action space
         self.action_space_wrapper = action_space_wrapper_factory(config)
         self.action_space = self.action_space_wrapper.get_action_space()
-        # self.logger.debug(f"Action space: {self.action_space}")
 
         # Observation space provided by environment transformation
         self.observation_space_wrapper = observation_space_wrapper_factory(config)
         self.observation_space = self.observation_space_wrapper.get_observation_space()
-        # self.logger.debug(f"Observation space: {self.observation_space}")
 
         self.pyb_client_id: int = env.env.PYB_CLIENT
         # Config and helper flags
@@ -98,7 +100,6 @@ class DroneRacingWrapper(Wrapper):
         self.delayed_gate_reward = DelayedReward() 
 
         
-
     @property
     def time(self) -> float:
         """Return the current simulation time in seconds."""
@@ -182,7 +183,7 @@ class DroneRacingWrapper(Wrapper):
         # interface. We automatically insert the sim time and reuse the last rotor forces.
         obs, _, done, info, f_rotors = self.env.step(self._sim_time, action=self._f_rotors)
         self._f_rotors[:] = f_rotors
-        obs = self.observation_transform(obs, info, self.no_gates_passed + self.init_gate_id_offset)
+        obs = self.observation_transform(obs, info)
         self.state_estimator.add_measurement(obs[0][:3], self._sim_time)
 
         estimated_velocity, estimated_acceleration = self.state_estimator.estimate_state()
@@ -227,27 +228,6 @@ class DroneRacingWrapper(Wrapper):
             self.logger.debug(f"Drone out of bounds at pos {transformed_obs}, aborting")
             termination_penalty = -1
             terminated = True
-
-
-        #! ToDo, reimplement. Also consider final goal, where we should give same reward
-        # # gate passed reward
-        # current_gate_id = obs[5]
-        # gate_passed_reward = 0
-        # if current_gate_id != self.last_gate_to_pass_id:
-        #     assert self.passed_gate_countdown_timer is None, "Countdown timer must be None"
-        #     COUNTDOWN_TIMER_LENTGH = 1
-        #     self.logger.debug(f"Drone passed gate {self.last_gate_to_pass_id}. Initializing countdoen timwer")
-        #     self.no_gates_passed += 1
-        #     self.last_gate_to_pass_id = current_gate_id
-        #     self.passed_gate_countdown_timer = COUNTDOWN_TIMER_LENTGH
-        
-        # # important do not give reward when terminated as this could lead to wrong incentive
-        # if not terminated and self.passed_gate_countdown_timer is not None:
-        #     self.passed_gate_countdown_timer -= 1
-        #     if self.passed_gate_countdown_timer == 0:
-        #         self.logger.debug(f"Countfown timer finished, gate pass rewarded")
-        #         gate_passed_reward = 1
-        #         self.passed_gate_countdown_timer = None
         
         if next_gate_id != self.last_gate_to_pass_id:
             if next_gate_id in self.gate_passed_set:
@@ -304,8 +284,8 @@ class DroneRacingWrapper(Wrapper):
         assert self.pyb_client_id != -1, "PyBullet not initialized with active GUI"
 
     @staticmethod
-    def observation_transform(obs: np.ndarray, info: dict[str, Any], no_gates_passed=None) -> np.ndarray:
-        """Transform the observation to include additional information.
+    def observation_transform(obs: np.ndarray, info: dict[str, Any]) -> np.ndarray:
+        """Transform the observation to include additional information and restructure the format.
 
         Args:
             obs: The observation to transform.
@@ -314,19 +294,6 @@ class DroneRacingWrapper(Wrapper):
         Returns:
             The transformed observation.
         """
-        # Observation space obs:
-        # [drone_xyz_yaw, gates_xyz_yaw, gates_in_range, obstacles_xyz, obstacles_in_range, gate_id]
-        # drone_xyz_yaw)  x, y, z, yaw are the drone pose of the drone in the world frame. Position
-        #       is in meters and yaw is in radians.
-        # gates_xyz_yaw)  The pose of the gates. Positions are in meters and yaw in radians. The
-        #       length is dependent on the number of gates. Ordering is [x0, y0, z0, yaw0, x1,...].
-        # gates_in_range)  A boolean array indicating if the drone is within the gates' range. The
-        #       length is dependent on the number of gates.
-        # obstacles_xyz)  The pose of the obstacles. Positions are in meters. The length is
-        #       dependent on the number of obstacles. Ordering is [x0, y0, z0, x1,...].
-        # obstacles_in_range)  A boolean array indicating if the drone is within the obstacles'
-        #       range. The length is dependent on the number of obstacles.
-        # gate_id)  The ID of the current target gate. -1 if the task is completed.
         drone_pos = obs[0:6:2]
         drone_yaw = obs[8]
         drone_xyz_yaw = np.concatenate([drone_pos, [drone_yaw]])
@@ -336,11 +303,6 @@ class DroneRacingWrapper(Wrapper):
         drone_rpy = obs[6:9]
         drone_ang_vel = obs[8:11]
 
-        # current gate id has some issues
-        # if no_gates_passed is not None:
-        #     current_gate_id = no_gates_passed
-        # else:
-        #     current_gate_id = info["current_gate_id"]
 
         obs = [
             drone_xyz_yaw,
@@ -360,9 +322,14 @@ class DroneRacingWrapper(Wrapper):
         """
         Transform the info dict, strip all non-pickable information from it to support multitasking.
         This mainly means that we remove all casadi objects from the info dict.
-        ToDo!!! We must find out whether casadi is even parallelizable
 
-        For now until we know how to do that, only return keys where value is eithe rprimitive type, numpy array or dict
+        For now until we know how to do that, only return keys where value is either primitive type, numpy array or dict
+
+        Args:
+            info: The info dict to transform.
+        
+        Returns:
+            The transformed info dict.
         """
         allowed_types = [int, float, np.ndarray, dict, tuple, bool, str]
         transformed_info = {}
@@ -372,6 +339,9 @@ class DroneRacingWrapper(Wrapper):
         return transformed_info
     
     def increase_env_complexity(self):
+        """
+        Increases the environment complexity of the simulator of either the gates and obstacles or the initial state.
+        """
         assert self.config.rl_config.increase_env_complexity, "Increase environment complexity must be set to True"
         assert self.config.rl_config.env_complexity_stages, "Env complexity stages must be set"
         env_complexity_cur_stage = self.config.rl_config.get("env_complexity_cur_stage", 0)
@@ -388,7 +358,9 @@ class DroneRacingWrapper(Wrapper):
             save_config_to_file(self.config)
 
     def increase_gates_obstacles_randomization(self):
-        # Somehow, warning required here
+        """
+        Increases the environment complexity by increasing the randomization of the gates and obstacles.
+        """
 
         assert self.config.rl_config.increase_env_complexity, "Increase environment complexity must be set to True"
         randomization_step_size = self.config.rl_config.increase_gates_obstacles_randomization_step_size
@@ -430,7 +402,9 @@ class DroneRacingWrapper(Wrapper):
             save_config_to_file(self.config)
 
     def increase_init_state_randomization(self):
-        # Somehow, warning required here
+        """
+        Increases the environment complexity by increasing the randomization of the initial state.
+        """
 
         assert self.config.rl_config.increase_env_complexity, "Increase environment complexity must be set to True"
         randomization_step_size = self.config.rl_config.increase_init_state_randomization_step_size

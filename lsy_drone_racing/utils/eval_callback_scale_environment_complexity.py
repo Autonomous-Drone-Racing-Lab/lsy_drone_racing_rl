@@ -16,21 +16,14 @@ logger = logging.getLogger("drone_rl")
 
 class EvalCallbackIncreaseEnvComplexity(BaseCallback):
     """
-    Callback for evaluating an agent.
+    Extension of the EvalCallback counting also the number of gates passed. If the number of gates passed exceeds a threshold, the environment complexity is increased.
 
-    :param eval_env: (Union[gym.Env, VecEnv]) The environment used for initialization
-    :param callback_on_new_best: (Optional[BaseCallback]) Callback to trigger
-        when there is a new best model according to the `mean_reward`
-    :param n_eval_episodes: (int) The number of episodes to test the agent
-    :param eval_freq: (int) Evaluate the agent every eval_freq call of the callback.
-    :param log_path: (str) Path to a folder where the evaluations (`evaluations.npz`)
-        will be saved. It will be updated at each evaluation.
-    :param best_model_save_path: (str) Path to a folder where the best model
-        according to performance on the eval env will be saved.
-    :param deterministic: (bool) Whether the evaluation should
-        use a stochastic or deterministic actions.
-    :param render: (bool) Whether to render or not the environment during evaluation
-    :param verbose: (int)
+    :param eval_env: The environment used for initialization
+    :param no_gates: Number of gates in the environment
+    :param n_eval_episodes: The number of episodes to test the agent
+    :param success_threshold: The threshold for the success rate
+    :param eval_freq: Evaluate the agent every ``eval_freq`` call of the callback.
+    :param verbose: Verbosity level: 0 for no output, 1 for indicating information about evaluation results
     """
     def __init__(self, 
                  eval_env: Union[gym.Env, VecEnv],

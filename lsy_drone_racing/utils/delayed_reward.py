@@ -11,6 +11,10 @@ class DelayedReward:
     def add_reward(self, reward, delay):
         """
         Add a reward to be given after a delay
+
+        Args:
+            reward: The reward to be given
+            delay: The delay after which the reward should be given
         """
         if self.reward is not None or self.delay is not None:
             print("Warning: Overwriting existing reward or delay")
@@ -38,6 +42,9 @@ class DelayedReward:
     def get_value(self, flush=False):
         """
         Get the reward if it is ready
+
+        Args:
+            flush: If True, the reward is given immediately
         """
         if self.reward is None or self.delay is None:
             return 0

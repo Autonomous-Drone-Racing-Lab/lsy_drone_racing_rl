@@ -1,4 +1,4 @@
-from typing import Callable, List, Optional, Tuple, Union
+from typing import List, Tuple, Union
 
 import gym
 import numpy as np
@@ -12,8 +12,7 @@ def evaluate_policy(
     return_episode_rewards: bool = False,
 ) -> Union[Tuple[float, float], Tuple[List[float], List[int]]]:
     """
-    Runs policy for ``n_eval_episodes`` episodes and returns average reward.
-    This is made to work only with one env.
+    Trivial Extenstion of the evaluate_policy function to also count the number of gates passed
 
     :param model: (BaseRLModel) The RL agent you want to evaluate.
     :param env: (gym.Env or VecEnv) The gym environment. In the case of a ``VecEnv``

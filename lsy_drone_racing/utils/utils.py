@@ -13,7 +13,7 @@ import pybullet as p
 import yaml
 from munch import munchify
 
-from lsy_drone_racing.controller import BaseController
+from lsy_drone_racing.controller.rl_controller import Controller
 
 if TYPE_CHECKING:
     from munch import Munch
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def load_controller(path: Path) -> Type[BaseController]:
+def load_controller(path: Path) -> Type[Controller]:
     """Load the controller module from the given path and return the Controller class.
 
     Args:

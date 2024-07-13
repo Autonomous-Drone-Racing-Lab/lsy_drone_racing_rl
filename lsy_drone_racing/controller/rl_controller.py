@@ -1,7 +1,6 @@
 from __future__ import annotations  # Python 3.10 type hints
 
 import numpy as np
-from scipy import interpolate
 
 from lsy_drone_racing.command import Command
 from lsy_drone_racing.action_space_wrapper import action_space_wrapper_factory
@@ -13,8 +12,6 @@ from stable_baselines3 import PPO
 
 
 class Controller():
-    """Template controller class."""
-
     def __init__(
         self,
         checkpoint: str,
@@ -22,9 +19,15 @@ class Controller():
         init_pos: np.ndarray,
         experiment_tracker: ExperimentTracker = None
     ):
-        #########################
-        # REPLACE THIS (START) ##
-        #########################
+        """Initialization of the controller.
+
+        Args:
+            checkpoint: Neural Network model checkpoint to load
+            config: Path to the configuration file.
+            init_pos: Initial position of the drone.
+            experiment_tracker: ExperimentTracker object to log data. (Optional)
+        """
+
         self.config = config
         self.state_estimator = StateEstimator(config.rl_config.state_estimator_buffer_size) 
         self.observation_space_wrapper = observation_space_wrapper_factory(config)
@@ -32,6 +35,7 @@ class Controller():
         self.model = PPO.load(checkpoint)
         self.experiment_tracker = experiment_tracker
 
+        # For state machine
         self._take_off = False
         self._take_off_time = 0.4
         self._initialized = False
@@ -44,9 +48,6 @@ class Controller():
         # Reset counters and buffers.
         self.reset()
         self.episode_reset()
-        #########################
-        # REPLACE THIS (END) ####
-        #########################
 
     def compute_control(
         self,
@@ -57,11 +58,6 @@ class Controller():
         info: dict | None = None,
     ) -> tuple[Command, list]:
         """Pick command sent to the quadrotor through a Crazyswarm/Crazyradio-like interface.
-
-        INSTRUCTIONS:
-            Re-implement this method to return the target position, velocity, acceleration,
-            attitude, and attitude rates to be sent from Crazyswarm to the Crazyflie using, e.g., a
-            `cmdFullState` call.
 
         Args:
             ep_time: Episode's elapsed time, in seconds.
@@ -85,14 +81,10 @@ class Controller():
             drone_pos = obs[0][:3]
             self.experiment_tracker.add_drone_obs(drone_pos, ep_time)
 
-        #########################
-        # REPLACE THIS (START) ##
-        #########################
-
-        # Handcrafted solution for getting_stated scenario.
-        max_time = 20
+        max_time = 20 # To abort in case it tkes too long
+        # Calculate compute command based on current flight state
         if not self._take_off:
-            print("Taking off")
+
             command_type = Command.TAKEOFF
             args = [0.3, self._take_off_time]  # Height, duration
             self._take_off = True  # Only send takeoff command once
@@ -137,10 +129,6 @@ class Controller():
             else:
                 command_type = Command.NONE
                 args = []
-
-        #########################
-        # REPLACE THIS (END) ####
-        #########################
 
         return command_type, args
 

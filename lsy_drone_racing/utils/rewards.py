@@ -2,6 +2,14 @@ import numpy as np
 import math
 
 def progress_reward(current_drone_pose, prev_drone_pose, next_gate_pose):
+    """
+    Reward function that rewards the drone for making progress towards the next gate.
+
+    Args:
+        current_drone_pose (np.ndarray): The current drone pose.
+        prev_drone_pose (np.ndarray): The previous drone pose.
+        next_gate_pose (np.ndarray): The next gate pose.
+    """
     current_drone_pos = current_drone_pose[:3]
     prev_drone_pos = prev_drone_pose[:3]
     next_gate_pos = next_gate_pose[:3]
@@ -14,6 +22,13 @@ def progress_reward(current_drone_pose, prev_drone_pose, next_gate_pose):
 
 
 def smooth_action_reward(current_action, prev_action):
+    """
+    Reward function that rewards the drone for making smooth actions.
+
+    Args:
+        current_action (np.ndarray): The current action.
+        prev_action (np.ndarray): The previous action.
+    """
     if prev_action is None:
         return 0
     action_difference = np.linalg.norm(current_action - prev_action)
@@ -21,6 +36,13 @@ def smooth_action_reward(current_action, prev_action):
     return -(action_difference ** 2) 
 
 def state_limits_exceeding_penalty(state, desirable_max_state):
+    """
+    Reward function that penalizes the drone for exceeding the state limits.
+
+    Args:
+        state (np.ndarray): The current state of the drone.
+        desirable_max_state (np.ndarray): The desirable maximum state of the drone.
+    """
     if all(state < desirable_max_state):
         return 0
     
@@ -28,22 +50,15 @@ def state_limits_exceeding_penalty(state, desirable_max_state):
     difference = np.linalg.norm(per_element_difference)
     return - math.exp(difference)
 
-def distance_reward(current_drone_pose, to_be_pos):
-    current_drone_pos = current_drone_pose[:3]
-    distance = np.linalg.norm(current_drone_pos - to_be_pos)
-    reward = 0
-    if distance < 0.1:
-        reward = 10
-    elif distance < 0.3:
-        reward = 5
-    elif distance < 0.5:
-        reward = 2
-    elif distance < 1:
-        reward = 1
-
-    return reward / 10
 
 def safety_reward(current_drone_pose, next_gate_pose):
+    """
+    Safety reward as proposed in https://rpg.ifi.uzh.ch/docs/IROS21_Yunlong.pdf. Reward is provided id drone is algined with center of gate
+
+    Args:
+        current_drone_pose (np.ndarray): The current drone pose.
+        next_gate_pose (np.ndarray): The next gate pose.
+    """
     EDGE_LENGTH = 0.45
     gate_center = next_gate_pose[:3]
     dist_to_gate = np.linalg.norm(current_drone_pose[:3] - gate_center)

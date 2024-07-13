@@ -3,6 +3,13 @@ import sys
 
 
 def setup_log(log_name, log_config):
+    """
+    Setup the logger with the given configuration. Creaing a logger of the proper name and initializing relevant folders
+
+    Args:
+        log_name: The name of the logger
+        log_config: The configuration for the logger
+    """
     logger = logging.getLogger(log_name)
     level_name = logging.getLevelName(log_config.log_level)
     logger.setLevel(level_name)

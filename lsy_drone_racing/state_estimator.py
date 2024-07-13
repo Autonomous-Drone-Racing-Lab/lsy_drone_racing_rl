@@ -2,16 +2,29 @@ import numpy as np
 from collections import deque
 
 class StateEstimator:
+    """
+    Estimate velocity and acceleration of drone based on buffer of position measurements.
+    """
     def __init__(self, buffer_size):
         self.buffer_size = buffer_size
         self.positions = deque(maxlen=self.buffer_size)
         self.timestamps = deque(maxlen=self.buffer_size)
     
     def reset(self):
+        """
+        Reset the state estimator.
+        """
         self.positions.clear()
         self.timestamps.clear()
     
     def add_measurement(self, pos: np.ndarray, timestamp: float):
+        """
+        Add a position measurement to the state estimator.
+
+        Args:
+            pos (np.ndarray): The position measurement.
+            timestamp (float): The timestamp of the measurement.
+        """
         if len(self.timestamps)  == 0:
             self.positions.append(pos)
             self.timestamps.append(timestamp)

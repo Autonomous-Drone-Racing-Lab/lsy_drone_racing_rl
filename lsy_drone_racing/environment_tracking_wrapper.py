@@ -4,6 +4,15 @@ import numpy as np
 from typing import Any, Dict
 
 class TrajectoryTrackingWrapper(gymnasium.Wrapper):
+    """
+    Wrapper object. Tracks the trajectory of the drone and saves it to a file.
+
+    Args:
+        env: The environment to wrap.
+        save_dir: The directory to save the trajectory to. If None, no file will be created.
+        filename: The filename to save the trajectory to. If None, the filename will be "trajectory_tracking.txt".
+        on_save_callback: Callback function that is called when the trajectory is saved. The callback function must accept a list of floats.
+    """
     def __init__(self, env, save_dir=None, filename=None, on_save_callback=None):
         super(TrajectoryTrackingWrapper, self).__init__(env)
         if save_dir:

@@ -3,6 +3,12 @@ from typing import List
 import numpy as np
 
 def visualize_trajectories(trajectories: List[List[float]]):
+    """
+    Visualize the given trajectories in a 3D plot.
+
+    Args:
+        trajectories (List[List[float]]): The trajectories to visualize.
+    """
     # create 3d plot, with axis description, ...
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')

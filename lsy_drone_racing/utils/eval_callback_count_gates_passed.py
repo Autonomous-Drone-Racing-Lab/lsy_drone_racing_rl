@@ -11,13 +11,7 @@ from lsy_drone_racing.utils.evaluate_policy import evaluate_policy
 
 class EvalCallbackCountGatesPassed(EventCallback):
     """
-    Callback for evaluating an agent.
-
-    .. warning::
-
-      When using multiple environments, each call to  ``env.step()``
-      will effectively correspond to ``n_envs`` steps.
-      To account for that, you can use ``eval_freq = max(eval_freq // n_envs, 1)``
+    Trivial Extenstion of the EvalCallback to also count the number of gates passed
 
     :param eval_env: The environment used for initialization
     :param callback_on_new_best: Callback to trigger
