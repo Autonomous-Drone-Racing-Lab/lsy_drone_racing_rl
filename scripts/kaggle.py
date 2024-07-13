@@ -16,10 +16,11 @@ logger = logging.getLogger(__name__)
 def main():
     """Run the simulation N times and save the results as 'submission.csv'."""
     n_runs = 100
-    config: str = "config/level0_extra.yaml"
+    config: str = "config/level3_extra.yaml"
     #checkpoint: str = "logs/next_gate_rp_relative_vel_more_disturb_test_1/best_model.zip"
-    #checkpoint = "Documentation/version_more_noise/best_solution_so_far/best_model.zip"
-    checkpoint="logs/next_gate_rp_relative_vel_more_disturb_replicate_1/best_model.zip"
+    checkpoint = "Documentation/version_more_noise/best_solution_so_far/best_model.zip"
+    #checkpoint="logs/next_gate_rp_relative_vel_more_disturb_replicate_1/best_model.zip"
+    #checkpoint="logs/next_gate_rp_relative_vel_more_disturb_replicate_2/best_model.zip"
     #checkpoint = "logs/next_gate_rp_relative_vel_more_more_disturb_test_1/rl_model_3400000_steps.zip"
     #config: str = "config/level3_extra_scale.yaml"
     #checkpoint: str = "logs/next_gate_rp_relative_vel_more_disturb_slow_action_scale_1/rl_model_7800000_steps.zip"
