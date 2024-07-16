@@ -6,10 +6,41 @@ verbose: True # Boolean passed to the Controller class, can be used to turn on a
 # Note: DSL's flyable/usable space in Toronto extends from -3 to +3 meters in x and y and 0 and 2 meters in z
 # Thus, only scenarios that meet these constraints are suitable for sim2real experiments
 
+log_config:
+  exp_name: flight_obstacles # Experiment name
+  log_dir: "./logs"
+  log_level: INFO
+  log_terminal: False
+
+rl_config:
+  action_space: xyz_relative # Action space, can be xyz, xyz_yaw
+  observation_space: relative_all_goals_all_obstacles_no_acc # relative_only_next_goal, absolute_all_goals
+  action_bound: 1
+  world_lower_bound: [-4, -4, 0]
+  world_upper_bound: [4, 4, 2]
+  desirable_vel_bound: 5
+  vel_bound: 7
+
+  # Reward fuction
+  lambda_progress: 3
+  lambda_termination: 1
+  lambda_gate_passed: 3
+  delay_gate_passed_reward: 3
+  lambda_velocity_limit: 2
+
+  # State Estimation
+  state_estimator_buffer_size: 5
+
+  # Increase env complexity
+  increase_env_complexity: true
+  increase_gates_obstacles_randomization_step_size: 0.05
+  success_threshold: 0.7
+
+
 # Environment
 quadrotor_config:
   seed: 1337 # Random seed
-  reseed_on_reset: True # Whether to re-seed the random number generator between episodes
+  reseed_on_reset: False # Whether to re-seed the random number generator between episodes
   gui: True # Whether to spawn PyBullet's GUI
   camera_view: [5, -40, -40, 0.5, -1, 0.5] # Distance, yaw, pitch, x, y, z target position
 
@@ -25,7 +56,7 @@ quadrotor_config:
   
   task: stabilization
   task_info:
-    stabilization_goal: [0, -2, 0.5]  # Final goal (target position in x-y-z)
+    stabilization_goal: [0, -1.5, 0.5]  # Final goal (target position in x-y-z)
     stabilization_goal_tolerance: 0.15
 
   # Nominal (pre-randomization) initial state
@@ -34,7 +65,7 @@ quadrotor_config:
     init_x_dot: 0
     init_y: 1.0
     init_y_dot: 0
-    init_z: 0.05
+    init_z: 0.5
     init_z_dot: 0
     init_phi: 0
     init_theta: 0
@@ -112,12 +143,12 @@ quadrotor_config:
   gates_and_obstacles_randomization_info:
     gates:
       distrib: "uniform"
-      low: -0.1
-      high: 0.1
+      low: -0.15
+      high: 0.15
     obstacles:
       distrib: "uniform"
-      low: -0.1
-      high: 0.1
+      low: -0.15
+      high: 0.15
 
   # Constraints
   constraints:
@@ -174,4 +205,3 @@ quadrotor_config:
   info_in_reset: True # Info dictionary as second return value (after the initial observation) of env.reset()
   normalized_rl_action_space: False
   done_on_out_of_bound: False
-

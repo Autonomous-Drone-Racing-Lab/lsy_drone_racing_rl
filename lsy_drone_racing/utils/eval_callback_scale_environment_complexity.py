@@ -1,0 +1,90 @@
+import logging
+import os
+from abc import ABC
+import warnings
+import typing
+from typing import Union, List, Dict, Any, Optional
+
+import gym
+import numpy as np
+
+from lsy_drone_racing.utils.evaluate_policy import evaluate_policy
+from stable_baselines3.common.vec_env import VecEnv, sync_envs_normalization, DummyVecEnv
+from stable_baselines3.common.callbacks import  BaseCallback
+
+logger = logging.getLogger("drone_rl")
+
+class EvalCallbackIncreaseEnvComplexity(BaseCallback):
+    """
+    Extension of the EvalCallback counting also the number of gates passed. If the number of gates passed exceeds a threshold, the environment complexity is increased.
+
+    :param eval_env: The environment used for initialization
+    :param no_gates: Number of gates in the environment
+    :param n_eval_episodes: The number of episodes to test the agent
+    :param success_threshold: The threshold for the success rate
+    :param eval_freq: Evaluate the agent every ``eval_freq`` call of the callback.
+    :param verbose: Verbosity level: 0 for no output, 1 for indicating information about evaluation results
+    """
+    def __init__(self, 
+                 eval_env: Union[gym.Env, VecEnv],
+                 no_gates: int,
+                 n_eval_episodes: int = 5,
+                 success_threshold: float = 0.7,
+                 eval_freq: int = 10000,
+                 verbose: int = 1,
+                 ):
+        super().__init__(verbose=verbose)
+        self.n_eval_episodes = n_eval_episodes
+        self.eval_freq = eval_freq
+        self.no_gates = no_gates
+        self.success_threshold = success_threshold
+
+        # Convert to VecEnv for consistency
+        if not isinstance(eval_env, VecEnv):
+            eval_env = DummyVecEnv([lambda: eval_env])
+
+        assert eval_env.num_envs == 1, "You must pass only one environment for evaluation"
+        self.eval_env = eval_env
+
+    def _init_callback(self):
+        # Does not work in some corner cases, where the wrapper is not the same
+        if not type(self.training_env) is type(self.eval_env):
+            warnings.warn("Training and eval env are not of the same type"
+                          "{} != {}".format(self.training_env, self.eval_env))
+
+    def _on_step(self) -> bool:
+
+        if self.eval_freq > 0 and self.n_calls % self.eval_freq == 0:            
+            episode_rewards, episode_lengths, no_gates_passed = evaluate_policy(
+                model=self.model,
+                env=self.eval_env,
+                n_eval_episodes=self.n_eval_episodes,
+                return_episode_rewards=True
+            )
+            mean_reward, std_reward = np.mean(episode_rewards), np.std(episode_rewards)
+            mean_ep_length, std_ep_length = np.mean(episode_lengths), np.std(episode_lengths)
+            mean_no_gates_passed = np.mean(no_gates_passed)
+            # Keep track of the last evaluation, useful for classes that derive from this callback
+            self.last_mean_reward = mean_reward
+            no_succecces = 0
+            for episode_gates_passed in no_gates_passed:
+                if episode_gates_passed == self.no_gates:
+                       no_succecces += 1
+            success_rate = no_succecces / self.n_eval_episodes
+
+            if self.verbose > 0:
+                logger.info(f"Eval num_timesteps={self.num_timesteps}")
+                logger.info(f"Episode_reward={mean_reward:.2f} +/- {std_reward:.2f}")
+                logger.info(f"Episode length: {mean_ep_length:.2f} +/- {std_ep_length:.2f}")
+                logger.info(f"No gates passed list: {no_gates_passed}")
+                logger.info(f"Success rate: {success_rate}")
+                self.logger.record("eval/mean_reward", float(mean_reward))
+                self.logger.record("eval/mean_ep_length", float(mean_ep_length))
+                self.logger.record("eval/mean_no_gates_passed", float(mean_no_gates_passed))
+                self.logger.record("eval/success_rate", float(success_rate))
+            
+            if success_rate > self.success_threshold:
+                logger.info(f"Success rate of {success_rate} higher than threshold of {self.success_threshold}. Increasing environment complexity")
+                self.eval_env.env_method("increase_env_complexity") # eval must also get harder
+                self.training_env.env_method("increase_env_complexity") 
+        return True

@@ -1,0 +1,722 @@
+Testing looger infos
+Testing looger warnings
+Testing looger errors
+Setting seed of wrapper to 1337
+Setting seed of wrapper to 0
+Eval num_timesteps=50000, 
+Episode_reward=50000.00 +/- 3.75
+Episode length: 990.00 +/- 0.00
+No gates passed list: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+Success rate: 0.0
+Eval num_timesteps=100000, 
+Episode_reward=100000.00 +/- 4.38
+Episode length: 72.30 +/- 1.62
+No gates passed list: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+Success rate: 0.0
+Eval num_timesteps=150000, 
+Episode_reward=150000.00 +/- -0.87
+Episode length: 713.20 +/- 296.99
+No gates passed list: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+Success rate: 0.0
+Eval num_timesteps=200000, 
+Episode_reward=200000.00 +/- 3.69
+Episode length: 57.30 +/- 2.57
+No gates passed list: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+Success rate: 0.0
+Eval num_timesteps=250000, 
+Episode_reward=250000.00 +/- 7.36
+Episode length: 53.30 +/- 4.94
+No gates passed list: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=300000, 
+Episode_reward=300000.00 +/- 4.27
+Episode length: 43.60 +/- 4.00
+No gates passed list: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+Success rate: 0.0
+Eval num_timesteps=350000, 
+Episode_reward=350000.00 +/- 6.17
+Episode length: 45.90 +/- 4.09
+No gates passed list: [1, 0, 1, 1, 1, 1, 0, 1, 1, 0]
+Success rate: 0.0
+Eval num_timesteps=400000, 
+Episode_reward=400000.00 +/- 5.58
+Episode length: 41.60 +/- 3.58
+No gates passed list: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=450000, 
+Episode_reward=450000.00 +/- 9.03
+Episode length: 72.70 +/- 21.21
+No gates passed list: [1, 1, 1, 1, 2, 1, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=500000, 
+Episode_reward=500000.00 +/- 4.47
+Episode length: 88.20 +/- 19.14
+No gates passed list: [1, 1, 1, 1, 1, 1, 1, 1, 1, 0]
+Success rate: 0.0
+Eval num_timesteps=550000, 
+Episode_reward=550000.00 +/- 8.70
+Episode length: 76.10 +/- 17.04
+No gates passed list: [1, 1, 1, 1, 2, 1, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=600000, 
+Episode_reward=600000.00 +/- 4.92
+Episode length: 206.30 +/- 173.33
+No gates passed list: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=650000, 
+Episode_reward=650000.00 +/- 8.23
+Episode length: 50.80 +/- 3.19
+No gates passed list: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=700000, 
+Episode_reward=700000.00 +/- 5.97
+Episode length: 43.70 +/- 6.99
+No gates passed list: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=750000, 
+Episode_reward=750000.00 +/- 8.12
+Episode length: 45.20 +/- 0.75
+No gates passed list: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=800000, 
+Episode_reward=800000.00 +/- 8.74
+Episode length: 52.50 +/- 1.80
+No gates passed list: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=850000, 
+Episode_reward=850000.00 +/- 6.35
+Episode length: 226.50 +/- 91.77
+No gates passed list: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=900000, 
+Episode_reward=900000.00 +/- 8.48
+Episode length: 50.50 +/- 0.67
+No gates passed list: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=950000, 
+Episode_reward=950000.00 +/- 10.55
+Episode length: 72.40 +/- 27.59
+No gates passed list: [1, 1, 1, 1, 1, 2, 1, 2, 2, 2]
+Success rate: 0.0
+Eval num_timesteps=1000000, 
+Episode_reward=1000000.00 +/- 9.02
+Episode length: 94.50 +/- 46.19
+No gates passed list: [1, 1, 2, 1, 1, 1, 2, 2, 1, 2]
+Success rate: 0.0
+Eval num_timesteps=1050000, 
+Episode_reward=1050000.00 +/- 10.61
+Episode length: 63.20 +/- 28.03
+No gates passed list: [1, 1, 1, 1, 1, 1, 1, 1, 1, 2]
+Success rate: 0.0
+Eval num_timesteps=1100000, 
+Episode_reward=1100000.00 +/- 9.02
+Episode length: 106.80 +/- 50.51
+No gates passed list: [2, 2, 1, 1, 1, 2, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=1150000, 
+Episode_reward=1150000.00 +/- 8.72
+Episode length: 128.40 +/- 49.83
+No gates passed list: [1, 1, 1, 1, 1, 1, 3, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=1200000, 
+Episode_reward=1200000.00 +/- 9.50
+Episode length: 51.50 +/- 7.58
+No gates passed list: [2, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=1250000, 
+Episode_reward=1250000.00 +/- 9.50
+Episode length: 213.00 +/- 308.57
+No gates passed list: [1, 1, 2, 1, 1, 1, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=1300000, 
+Episode_reward=1300000.00 +/- 5.95
+Episode length: 198.20 +/- 108.02
+No gates passed list: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=1350000, 
+Episode_reward=1350000.00 +/- 8.81
+Episode length: 129.50 +/- 53.06
+No gates passed list: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=1400000, 
+Episode_reward=1400000.00 +/- 9.64
+Episode length: 50.50 +/- 0.50
+No gates passed list: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=1450000, 
+Episode_reward=1450000.00 +/- 11.22
+Episode length: 63.40 +/- 19.32
+No gates passed list: [2, 1, 1, 1, 1, 2, 2, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=1500000, 
+Episode_reward=1500000.00 +/- 9.07
+Episode length: 49.20 +/- 2.99
+No gates passed list: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=1550000, 
+Episode_reward=1550000.00 +/- 9.79
+Episode length: 72.20 +/- 59.31
+No gates passed list: [1, 1, 1, 1, 1, 2, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=1600000, 
+Episode_reward=1600000.00 +/- 9.90
+Episode length: 57.80 +/- 6.06
+No gates passed list: [1, 2, 1, 2, 2, 1, 2, 2, 1, 2]
+Success rate: 0.0
+Eval num_timesteps=1650000, 
+Episode_reward=1650000.00 +/- 9.90
+Episode length: 54.30 +/- 3.49
+No gates passed list: [1, 2, 1, 1, 1, 1, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=1700000, 
+Episode_reward=1700000.00 +/- 12.99
+Episode length: 70.70 +/- 19.47
+No gates passed list: [2, 2, 2, 2, 2, 1, 2, 1, 2, 1]
+Success rate: 0.0
+Eval num_timesteps=1750000, 
+Episode_reward=1750000.00 +/- 8.61
+Episode length: 45.90 +/- 0.54
+No gates passed list: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=1800000, 
+Episode_reward=1800000.00 +/- 17.48
+Episode length: 109.70 +/- 19.29
+No gates passed list: [2, 2, 2, 4, 2, 2, 2, 2, 2, 2]
+Success rate: 0.1
+Eval num_timesteps=1850000, 
+Episode_reward=1850000.00 +/- 20.86
+Episode length: 93.40 +/- 9.76
+No gates passed list: [2, 2, 4, 2, 3, 2, 3, 2, 3, 3]
+Success rate: 0.1
+Eval num_timesteps=1900000, 
+Episode_reward=1900000.00 +/- 17.21
+Episode length: 85.90 +/- 33.86
+No gates passed list: [1, 2, 2, 1, 4, 4, 2, 1, 3, 1]
+Success rate: 0.2
+Eval num_timesteps=1950000, 
+Episode_reward=1950000.00 +/- 19.33
+Episode length: 94.20 +/- 7.70
+No gates passed list: [2, 3, 3, 2, 2, 3, 2, 2, 3, 3]
+Success rate: 0.0
+Eval num_timesteps=2000000, 
+Episode_reward=2000000.00 +/- 19.38
+Episode length: 101.50 +/- 31.61
+No gates passed list: [2, 4, 3, 2, 2, 2, 3, 2, 2, 2]
+Success rate: 0.1
+Eval num_timesteps=2050000, 
+Episode_reward=2050000.00 +/- 18.39
+Episode length: 92.60 +/- 10.71
+No gates passed list: [2, 2, 3, 2, 3, 2, 3, 2, 2, 2]
+Success rate: 0.0
+Eval num_timesteps=2100000, 
+Episode_reward=2100000.00 +/- 16.38
+Episode length: 191.90 +/- 266.21
+No gates passed list: [2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+Success rate: 0.0
+Eval num_timesteps=2150000, 
+Episode_reward=2150000.00 +/- 20.02
+Episode length: 93.00 +/- 10.31
+No gates passed list: [3, 2, 3, 2, 2, 2, 3, 3, 2, 2]
+Success rate: 0.0
+Eval num_timesteps=2200000, 
+Episode_reward=2200000.00 +/- 23.59
+Episode length: 117.50 +/- 17.02
+No gates passed list: [3, 3, 2, 3, 3, 3, 2, 3, 3, 3]
+Success rate: 0.0
+Eval num_timesteps=2250000, 
+Episode_reward=2250000.00 +/- 27.42
+Episode length: 126.10 +/- 53.80
+No gates passed list: [3, 3, 3, 3, 4, 3, 4, 4, 3, 4]
+Success rate: 0.4
+Eval num_timesteps=2300000, 
+Episode_reward=2300000.00 +/- 28.67
+Episode length: 108.80 +/- 3.74
+No gates passed list: [3, 4, 4, 3, 4, 4, 4, 4, 4, 4]
+Success rate: 0.8
+Success rate of 0.8 higher than threshold of 0.7. Increasing environment complexity
+Eval num_timesteps=2350000, 
+Episode_reward=2350000.00 +/- 23.35
+Episode length: 101.30 +/- 32.66
+No gates passed list: [4, 1, 2, 3, 4, 4, 4, 4, 4, 1]
+Success rate: 0.6
+Eval num_timesteps=2400000, 
+Episode_reward=2400000.00 +/- 25.31
+Episode length: 124.60 +/- 35.88
+No gates passed list: [3, 3, 4, 3, 4, 4, 3, 4, 3, 3]
+Success rate: 0.4
+Eval num_timesteps=2450000, 
+Episode_reward=2450000.00 +/- 20.63
+Episode length: 137.40 +/- 121.42
+No gates passed list: [4, 2, 1, 1, 1, 3, 3, 4, 3, 4]
+Success rate: 0.3
+Eval num_timesteps=2500000, 
+Episode_reward=2500000.00 +/- 22.78
+Episode length: 103.50 +/- 33.01
+No gates passed list: [3, 2, 1, 4, 4, 3, 4, 2, 3, 4]
+Success rate: 0.4
+Eval num_timesteps=2550000, 
+Episode_reward=2550000.00 +/- 27.97
+Episode length: 103.90 +/- 8.23
+No gates passed list: [4, 4, 4, 4, 4, 4, 3, 3, 4, 4]
+Success rate: 0.8
+Success rate of 0.8 higher than threshold of 0.7. Increasing environment complexity
+Eval num_timesteps=2600000, 
+Episode_reward=2600000.00 +/- 16.25
+Episode length: 67.80 +/- 28.41
+No gates passed list: [1, 1, 3, 3, 1, 4, 1, 1, 2, 4]
+Success rate: 0.2
+Eval num_timesteps=2650000, 
+Episode_reward=2650000.00 +/- 10.84
+Episode length: 58.30 +/- 29.38
+No gates passed list: [1, 1, 2, 1, 1, 3, 1, 1, 1, 3]
+Success rate: 0.0
+Eval num_timesteps=2700000, 
+Episode_reward=2700000.00 +/- 17.69
+Episode length: 88.30 +/- 42.93
+No gates passed list: [3, 1, 4, 4, 3, 1, 1, 3, 3, 1]
+Success rate: 0.2
+Eval num_timesteps=2750000, 
+Episode_reward=2750000.00 +/- 13.74
+Episode length: 75.10 +/- 43.46
+No gates passed list: [1, 4, 1, 1, 4, 1, 1, 3, 1, 1]
+Success rate: 0.2
+Eval num_timesteps=2800000, 
+Episode_reward=2800000.00 +/- 19.92
+Episode length: 81.00 +/- 30.73
+No gates passed list: [4, 4, 1, 2, 2, 3, 4, 1, 1, 4]
+Success rate: 0.4
+Eval num_timesteps=2850000, 
+Episode_reward=2850000.00 +/- 12.22
+Episode length: 57.50 +/- 21.21
+No gates passed list: [2, 2, 0, 1, 2, 1, 1, 1, 4, 1]
+Success rate: 0.1
+Eval num_timesteps=2900000, 
+Episode_reward=2900000.00 +/- 14.61
+Episode length: 73.40 +/- 33.28
+No gates passed list: [2, 1, 3, 3, 4, 1, 1, 1, 0, 1]
+Success rate: 0.1
+Eval num_timesteps=2950000, 
+Episode_reward=2950000.00 +/- 11.19
+Episode length: 52.20 +/- 20.49
+No gates passed list: [1, 3, 1, 0, 1, 1, 1, 3, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=3000000, 
+Episode_reward=3000000.00 +/- 8.98
+Episode length: 58.10 +/- 30.84
+No gates passed list: [1, 2, 1, 3, 1, 1, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=3050000, 
+Episode_reward=3050000.00 +/- 13.96
+Episode length: 63.00 +/- 27.36
+No gates passed list: [4, 1, 1, 1, 3, 1, 2, 1, 1, 2]
+Success rate: 0.1
+Eval num_timesteps=3100000, 
+Episode_reward=3100000.00 +/- 13.41
+Episode length: 71.20 +/- 35.04
+No gates passed list: [1, 2, 1, 2, 1, 1, 4, 4, 1, 1]
+Success rate: 0.2
+Eval num_timesteps=3150000, 
+Episode_reward=3150000.00 +/- 11.62
+Episode length: 71.00 +/- 47.67
+No gates passed list: [1, 0, 2, 0, 3, 3, 1, 1, 1, 2]
+Success rate: 0.0
+Eval num_timesteps=3200000, 
+Episode_reward=3200000.00 +/- 15.01
+Episode length: 66.90 +/- 29.28
+No gates passed list: [4, 1, 1, 1, 1, 4, 1, 1, 1, 3]
+Success rate: 0.2
+Eval num_timesteps=3250000, 
+Episode_reward=3250000.00 +/- 22.40
+Episode length: 93.50 +/- 28.80
+No gates passed list: [4, 4, 1, 4, 4, 4, 4, 3, 1, 0]
+Success rate: 0.6
+Eval num_timesteps=3300000, 
+Episode_reward=3300000.00 +/- 12.79
+Episode length: 69.00 +/- 38.95
+No gates passed list: [1, 1, 2, 3, 1, 1, 2, 1, 1, 2]
+Success rate: 0.0
+Eval num_timesteps=3350000, 
+Episode_reward=3350000.00 +/- 10.43
+Episode length: 50.90 +/- 22.25
+No gates passed list: [1, 1, 1, 1, 1, 2, 1, 1, 4, 1]
+Success rate: 0.1
+Eval num_timesteps=3400000, 
+Episode_reward=3400000.00 +/- 18.85
+Episode length: 78.60 +/- 26.30
+No gates passed list: [4, 4, 4, 1, 3, 2, 2, 1, 1, 2]
+Success rate: 0.3
+Eval num_timesteps=3450000, 
+Episode_reward=3450000.00 +/- 11.88
+Episode length: 58.20 +/- 20.78
+No gates passed list: [1, 2, 1, 2, 1, 1, 1, 2, 2, 2]
+Success rate: 0.0
+Eval num_timesteps=3500000, 
+Episode_reward=3500000.00 +/- 15.13
+Episode length: 86.90 +/- 44.46
+No gates passed list: [1, 1, 4, 3, 3, 1, 1, 1, 2, 2]
+Success rate: 0.1
+Eval num_timesteps=3550000, 
+Episode_reward=3550000.00 +/- 13.07
+Episode length: 68.90 +/- 31.47
+No gates passed list: [1, 3, 1, 1, 3, 2, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=3600000, 
+Episode_reward=3600000.00 +/- 16.70
+Episode length: 79.00 +/- 29.97
+No gates passed list: [4, 1, 2, 3, 2, 1, 3, 1, 2, 1]
+Success rate: 0.1
+Eval num_timesteps=3650000, 
+Episode_reward=3650000.00 +/- 16.40
+Episode length: 77.30 +/- 36.00
+No gates passed list: [1, 3, 1, 2, 2, 1, 3, 4, 2, 1]
+Success rate: 0.1
+Eval num_timesteps=3700000, 
+Episode_reward=3700000.00 +/- 17.73
+Episode length: 75.80 +/- 31.80
+No gates passed list: [4, 1, 3, 4, 1, 4, 1, 1, 3, 1]
+Success rate: 0.3
+Eval num_timesteps=3750000, 
+Episode_reward=3750000.00 +/- 12.18
+Episode length: 61.40 +/- 27.21
+No gates passed list: [1, 1, 2, 1, 2, 2, 1, 1, 1, 3]
+Success rate: 0.0
+Eval num_timesteps=3800000, 
+Episode_reward=3800000.00 +/- 10.85
+Episode length: 58.10 +/- 16.83
+No gates passed list: [1, 2, 1, 1, 1, 1, 2, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=3850000, 
+Episode_reward=3850000.00 +/- 10.31
+Episode length: 53.90 +/- 13.85
+No gates passed list: [1, 1, 1, 2, 1, 2, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=3900000, 
+Episode_reward=3900000.00 +/- 11.78
+Episode length: 65.30 +/- 22.27
+No gates passed list: [1, 2, 1, 1, 1, 1, 1, 2, 2, 1]
+Success rate: 0.0
+Eval num_timesteps=3950000, 
+Episode_reward=3950000.00 +/- 8.94
+Episode length: 47.80 +/- 4.49
+No gates passed list: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=4000000, 
+Episode_reward=4000000.00 +/- 10.21
+Episode length: 65.60 +/- 29.41
+No gates passed list: [1, 2, 1, 1, 1, 1, 2, 2, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=4050000, 
+Episode_reward=4050000.00 +/- 9.52
+Episode length: 65.80 +/- 39.91
+No gates passed list: [2, 2, 1, 1, 1, 1, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=4100000, 
+Episode_reward=4100000.00 +/- 10.02
+Episode length: 64.60 +/- 46.36
+No gates passed list: [2, 1, 1, 1, 1, 2, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=4150000, 
+Episode_reward=4150000.00 +/- 9.54
+Episode length: 50.40 +/- 15.52
+No gates passed list: [1, 1, 2, 1, 1, 1, 1, 1, 2, 1]
+Success rate: 0.0
+Eval num_timesteps=4200000, 
+Episode_reward=4200000.00 +/- 10.63
+Episode length: 66.00 +/- 35.70
+No gates passed list: [2, 2, 1, 1, 1, 1, 1, 1, 2, 1]
+Success rate: 0.0
+Eval num_timesteps=4250000, 
+Episode_reward=4250000.00 +/- 12.22
+Episode length: 70.40 +/- 40.82
+No gates passed list: [1, 1, 2, 2, 1, 2, 1, 3, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=4300000, 
+Episode_reward=4300000.00 +/- 13.29
+Episode length: 68.60 +/- 26.81
+No gates passed list: [3, 2, 1, 2, 1, 1, 2, 3, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=4350000, 
+Episode_reward=4350000.00 +/- 16.20
+Episode length: 83.10 +/- 44.75
+No gates passed list: [4, 2, 3, 3, 1, 1, 3, 2, 1, 1]
+Success rate: 0.1
+Eval num_timesteps=4400000, 
+Episode_reward=4400000.00 +/- 11.43
+Episode length: 57.60 +/- 27.50
+No gates passed list: [1, 1, 1, 2, 1, 1, 2, 1, 2, 1]
+Success rate: 0.0
+Eval num_timesteps=4450000, 
+Episode_reward=4450000.00 +/- 8.93
+Episode length: 45.30 +/- 6.34
+No gates passed list: [1, 2, 1, 1, 1, 1, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=4500000, 
+Episode_reward=4500000.00 +/- 9.54
+Episode length: 44.40 +/- 7.61
+No gates passed list: [1, 1, 1, 1, 1, 1, 1, 1, 1, 2]
+Success rate: 0.0
+Eval num_timesteps=4550000, 
+Episode_reward=4550000.00 +/- 10.92
+Episode length: 51.10 +/- 15.23
+No gates passed list: [0, 1, 1, 0, 2, 1, 2, 1, 2, 2]
+Success rate: 0.0
+Eval num_timesteps=4600000, 
+Episode_reward=4600000.00 +/- 10.60
+Episode length: 55.10 +/- 26.75
+No gates passed list: [1, 2, 1, 1, 1, 2, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=4650000, 
+Episode_reward=4650000.00 +/- 9.40
+Episode length: 47.50 +/- 19.07
+No gates passed list: [1, 1, 2, 1, 1, 1, 1, 1, 1, 0]
+Success rate: 0.0
+Eval num_timesteps=4700000, 
+Episode_reward=4700000.00 +/- 11.59
+Episode length: 52.40 +/- 16.30
+No gates passed list: [1, 1, 2, 2, 1, 1, 1, 2, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=4750000, 
+Episode_reward=4750000.00 +/- 13.94
+Episode length: 61.80 +/- 21.40
+No gates passed list: [4, 2, 2, 1, 1, 2, 1, 1, 2, 1]
+Success rate: 0.1
+Eval num_timesteps=4800000, 
+Episode_reward=4800000.00 +/- 8.77
+Episode length: 51.20 +/- 16.73
+No gates passed list: [2, 1, 1, 2, 1, 1, 1, 3, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=4850000, 
+Episode_reward=4850000.00 +/- 11.88
+Episode length: 59.00 +/- 30.39
+No gates passed list: [0, 1, 1, 1, 4, 1, 1, 0, 1, 4]
+Success rate: 0.2
+Eval num_timesteps=4900000, 
+Episode_reward=4900000.00 +/- 13.72
+Episode length: 93.90 +/- 81.05
+No gates passed list: [2, 4, 1, 2, 1, 1, 1, 2, 2, 1]
+Success rate: 0.1
+Eval num_timesteps=4950000, 
+Episode_reward=4950000.00 +/- 12.39
+Episode length: 59.90 +/- 24.48
+No gates passed list: [1, 2, 1, 2, 1, 2, 1, 3, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=5000000, 
+Episode_reward=5000000.00 +/- 10.17
+Episode length: 66.70 +/- 48.88
+No gates passed list: [1, 1, 3, 1, 1, 1, 1, 1, 2, 1]
+Success rate: 0.0
+Eval num_timesteps=5050000, 
+Episode_reward=5050000.00 +/- 12.49
+Episode length: 62.30 +/- 17.86
+No gates passed list: [2, 1, 2, 1, 2, 1, 2, 1, 1, 2]
+Success rate: 0.0
+Eval num_timesteps=5100000, 
+Episode_reward=5100000.00 +/- 11.75
+Episode length: 60.30 +/- 26.33
+No gates passed list: [1, 1, 2, 1, 1, 1, 2, 2, 1, 2]
+Success rate: 0.0
+Eval num_timesteps=5150000, 
+Episode_reward=5150000.00 +/- 13.97
+Episode length: 58.90 +/- 20.93
+No gates passed list: [4, 1, 2, 1, 2, 1, 1, 2, 2, 1]
+Success rate: 0.1
+Eval num_timesteps=5200000, 
+Episode_reward=5200000.00 +/- 16.06
+Episode length: 74.20 +/- 25.08
+No gates passed list: [1, 2, 1, 1, 4, 2, 2, 1, 3, 2]
+Success rate: 0.1
+Eval num_timesteps=5250000, 
+Episode_reward=5250000.00 +/- 12.98
+Episode length: 66.90 +/- 38.54
+No gates passed list: [2, 1, 1, 1, 4, 1, 1, 3, 1, 2]
+Success rate: 0.1
+Eval num_timesteps=5300000, 
+Episode_reward=5300000.00 +/- 14.20
+Episode length: 97.10 +/- 62.21
+No gates passed list: [1, 2, 2, 1, 2, 1, 3, 2, 3, 1]
+Success rate: 0.0
+Eval num_timesteps=5350000, 
+Episode_reward=5350000.00 +/- 10.52
+Episode length: 57.70 +/- 21.55
+No gates passed list: [1, 1, 4, 1, 1, 1, 1, 1, 1, 1]
+Success rate: 0.1
+Eval num_timesteps=5400000, 
+Episode_reward=5400000.00 +/- 11.32
+Episode length: 63.20 +/- 47.76
+No gates passed list: [1, 2, 1, 1, 3, 1, 1, 1, 2, 1]
+Success rate: 0.0
+Eval num_timesteps=5450000, 
+Episode_reward=5450000.00 +/- 15.64
+Episode length: 69.60 +/- 23.22
+No gates passed list: [1, 4, 1, 2, 2, 2, 2, 1, 2, 2]
+Success rate: 0.1
+Eval num_timesteps=5500000, 
+Episode_reward=5500000.00 +/- 10.83
+Episode length: 56.20 +/- 19.96
+No gates passed list: [3, 2, 1, 1, 1, 1, 1, 0, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=5550000, 
+Episode_reward=5550000.00 +/- 13.18
+Episode length: 98.70 +/- 87.43
+No gates passed list: [2, 2, 1, 1, 1, 3, 1, 2, 1, 2]
+Success rate: 0.0
+Eval num_timesteps=5600000, 
+Episode_reward=5600000.00 +/- 12.20
+Episode length: 64.80 +/- 29.44
+No gates passed list: [2, 1, 1, 1, 3, 1, 1, 1, 1, 2]
+Success rate: 0.0
+Eval num_timesteps=5650000, 
+Episode_reward=5650000.00 +/- 14.27
+Episode length: 83.10 +/- 59.38
+No gates passed list: [1, 0, 3, 3, 1, 1, 1, 2, 3, 1]
+Success rate: 0.0
+Eval num_timesteps=5700000, 
+Episode_reward=5700000.00 +/- 13.53
+Episode length: 89.00 +/- 57.40
+No gates passed list: [3, 1, 1, 1, 1, 2, 4, 1, 2, 1]
+Success rate: 0.1
+Eval num_timesteps=5750000, 
+Episode_reward=5750000.00 +/- 12.03
+Episode length: 167.90 +/- 277.86
+No gates passed list: [1, 3, 1, 1, 2, 1, 2, 1, 1, 2]
+Success rate: 0.0
+Eval num_timesteps=5800000, 
+Episode_reward=5800000.00 +/- 9.99
+Episode length: 70.40 +/- 57.23
+No gates passed list: [1, 1, 1, 2, 1, 1, 2, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=5850000, 
+Episode_reward=5850000.00 +/- 7.62
+Episode length: 84.30 +/- 58.77
+No gates passed list: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=5900000, 
+Episode_reward=5900000.00 +/- 16.26
+Episode length: 82.80 +/- 40.73
+No gates passed list: [2, 4, 1, 4, 1, 2, 1, 1, 1, 2]
+Success rate: 0.2
+Eval num_timesteps=5950000, 
+Episode_reward=5950000.00 +/- 10.40
+Episode length: 80.40 +/- 82.33
+No gates passed list: [3, 1, 1, 1, 1, 3, 1, 2, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=6000000, 
+Episode_reward=6000000.00 +/- 7.22
+Episode length: 65.00 +/- 57.01
+No gates passed list: [1, 1, 1, 1, 1, 1, 1, 0, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=6050000, 
+Episode_reward=6050000.00 +/- 5.17
+Episode length: 43.00 +/- 15.26
+No gates passed list: [0, 1, 1, 1, 1, 1, 1, 0, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=6100000, 
+Episode_reward=6100000.00 +/- 6.14
+Episode length: 87.50 +/- 122.90
+No gates passed list: [0, 1, 1, 0, 1, 2, 2, 1, 1, 0]
+Success rate: 0.0
+Eval num_timesteps=6150000, 
+Episode_reward=6150000.00 +/- 4.74
+Episode length: 36.40 +/- 8.60
+No gates passed list: [0, 1, 1, 0, 0, 0, 1, 2, 0, 0]
+Success rate: 0.0
+Eval num_timesteps=6200000, 
+Episode_reward=6200000.00 +/- 8.49
+Episode length: 53.90 +/- 25.40
+No gates passed list: [1, 3, 2, 2, 1, 1, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=6250000, 
+Episode_reward=6250000.00 +/- 8.03
+Episode length: 54.00 +/- 32.00
+No gates passed list: [1, 1, 1, 1, 1, 2, 1, 0, 1, 2]
+Success rate: 0.0
+Eval num_timesteps=6300000, 
+Episode_reward=6300000.00 +/- 9.01
+Episode length: 71.60 +/- 76.00
+No gates passed list: [2, 2, 1, 1, 1, 1, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=6350000, 
+Episode_reward=6350000.00 +/- 9.62
+Episode length: 109.20 +/- 168.43
+No gates passed list: [2, 1, 1, 1, 1, 1, 1, 1, 1, 2]
+Success rate: 0.0
+Eval num_timesteps=6400000, 
+Episode_reward=6400000.00 +/- 10.07
+Episode length: 50.70 +/- 8.45
+No gates passed list: [1, 1, 2, 1, 2, 2, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=6450000, 
+Episode_reward=6450000.00 +/- 11.23
+Episode length: 71.10 +/- 53.28
+No gates passed list: [1, 2, 1, 1, 1, 1, 1, 2, 2, 2]
+Success rate: 0.0
+Eval num_timesteps=6500000, 
+Episode_reward=6500000.00 +/- 8.87
+Episode length: 48.70 +/- 12.52
+No gates passed list: [1, 1, 2, 1, 1, 1, 1, 1, 1, 2]
+Success rate: 0.0
+Eval num_timesteps=6550000, 
+Episode_reward=6550000.00 +/- 8.77
+Episode length: 49.50 +/- 14.42
+No gates passed list: [1, 1, 1, 1, 2, 1, 2, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=6600000, 
+Episode_reward=6600000.00 +/- 8.13
+Episode length: 47.70 +/- 11.92
+No gates passed list: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=6650000, 
+Episode_reward=6650000.00 +/- 10.14
+Episode length: 57.40 +/- 17.22
+No gates passed list: [1, 1, 2, 2, 1, 2, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=6700000, 
+Episode_reward=6700000.00 +/- 9.87
+Episode length: 78.10 +/- 69.13
+No gates passed list: [2, 1, 1, 1, 1, 1, 0, 3, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=6750000, 
+Episode_reward=6750000.00 +/- 11.30
+Episode length: 76.60 +/- 54.51
+No gates passed list: [2, 2, 1, 1, 1, 2, 1, 1, 1, 2]
+Success rate: 0.0
+Eval num_timesteps=6800000, 
+Episode_reward=6800000.00 +/- 9.12
+Episode length: 47.60 +/- 10.54
+No gates passed list: [1, 1, 2, 1, 1, 1, 1, 1, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=6850000, 
+Episode_reward=6850000.00 +/- 10.76
+Episode length: 50.00 +/- 13.03
+No gates passed list: [1, 1, 2, 1, 2, 1, 1, 2, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=6900000, 
+Episode_reward=6900000.00 +/- 10.90
+Episode length: 56.00 +/- 12.90
+No gates passed list: [1, 2, 1, 2, 2, 1, 1, 1, 1, 2]
+Success rate: 0.0
+Eval num_timesteps=6950000, 
+Episode_reward=6950000.00 +/- 9.85
+Episode length: 53.50 +/- 9.65
+No gates passed list: [2, 1, 1, 1, 2, 1, 1, 1, 1, 2]
+Success rate: 0.0
+Eval num_timesteps=7000000, 
+Episode_reward=7000000.00 +/- 10.54
+Episode length: 55.10 +/- 14.95
+No gates passed list: [1, 1, 2, 1, 1, 1, 1, 2, 2, 1]
+Success rate: 0.0
+Eval num_timesteps=7050000, 
+Episode_reward=7050000.00 +/- 11.25
+Episode length: 54.10 +/- 17.38
+No gates passed list: [2, 1, 2, 1, 1, 1, 1, 1, 2, 1]
+Success rate: 0.0
+Eval num_timesteps=7100000, 
+Episode_reward=7100000.00 +/- 12.87
+Episode length: 64.10 +/- 20.38
+No gates passed list: [1, 1, 2, 2, 2, 2, 2, 2, 1, 1]
+Success rate: 0.0
+Eval num_timesteps=7150000, 
+Episode_reward=7150000.00 +/- 17.50
+Episode length: 117.40 +/- 72.45
+No gates passed list: [2, 1, 3, 2, 2, 3, 2, 2, 2, 2]
+Success rate: 0.0

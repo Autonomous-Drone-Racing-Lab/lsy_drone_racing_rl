@@ -1,0 +1,18 @@
+{
+    "gate_id_to_name_mapping": {
+        "1": "small_portal",
+        "0": "large_portal"
+    },
+
+    "gate_geometry":{
+        "large_portal": {
+            "height": 1.0,
+            "edge": 0.45
+        },
+        "small_portal": {
+           "height": 0.525,
+            "edge": 0.45
+        }
+    }
+
+}
