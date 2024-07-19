@@ -49,9 +49,9 @@ jobs:
       - run: pip install stable-baselines3
         shell: bash -el {0}
       # plot current directory
-      - run: pwd
+      - run: cat $KAGGLE_USERNAME
         shell: bash -el {0}
-      - run: ls ./Documentation
+      - run: cat $KAGGLE_KEY
         shell: bash -el {0}
       - name: Run simulation tests
         run: python scripts/kaggle_original.py
