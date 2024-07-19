@@ -9,6 +9,9 @@ Look for instructions in `README.md` and `edit_this.py`.
 
 from __future__ import annotations
 
+import sys
+sys.path.append(".")
+
 import logging
 import time
 from functools import partial

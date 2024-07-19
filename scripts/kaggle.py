@@ -21,7 +21,7 @@ def main():
     #checkpoint = "Documentation/version_more_noise/best_solution_so_far/best_model.zip"
     #checkpoint="logs/curiculum_learning_1/rl_model_3900000_steps.zip"
     #checkpoint="logs/curiculum_learning_nearest_gate_3/rl_model_1200000_steps.zip"
-    checkpoint="logs/baseline_1/rl_model_2000000_steps.zip"
+    checkpoint="logs/baseline_1/rl_model_2200000_steps.zip"
     #checkpoint="./logs/curiculum_learning_nearest_gate_3/rl_model_800000_steps.zip"
     #checkpoint="logs/curiculum_learning_nearest_gate_3/rl_model_2600000_steps.zip" # this was wonderful
     #checkpoint="logs/next_gate_rp_relative_vel_more_disturb_replicate_1/best_model.zip"
