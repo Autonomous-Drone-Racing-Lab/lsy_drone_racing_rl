@@ -51,7 +51,7 @@ jobs:
       # plot current directory
       - run: pwd
         shell: bash -el {0}
-      - run: ls 
+      - run: ls ./Documentation
         shell: bash -el {0}
       - name: Run simulation tests
         run: python scripts/kaggle_original.py
