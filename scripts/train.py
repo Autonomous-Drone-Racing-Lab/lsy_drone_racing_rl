@@ -49,7 +49,7 @@ def main(checkpoint=None, config: str = "config/getting_started.yaml"):
         no_gates = len(config.quadrotor_config.gates)
         success_threshold = config.rl_config.success_threshold
         eval_env = create_race_env(config, rank=0, is_train=False, gui=False, random_gate_init=False)
-        eval_callback = EvalCallbackIncreaseEnvComplexity(eval_env, no_gates=no_gates,success_threshold=success_threshold,  n_eval_episodes=10, eval_freq=eval_frquency_scaled)
+        eval_callback = EvalCallbackIncreaseEnvComplexity(eval_env, no_gates=no_gates,success_threshold=success_threshold,  n_eval_episodes=50, eval_freq=eval_frquency_scaled)
     else:
         eval_config = "config/level3.yaml"
         eval_config = load_config(Path(eval_config))
