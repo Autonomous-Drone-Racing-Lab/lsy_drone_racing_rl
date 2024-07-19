@@ -5,7 +5,6 @@ on:
     branches:
       - master
       - main
-      - easy_config
 
   workflow_dispatch:
 
