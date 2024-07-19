@@ -7,34 +7,38 @@ verbose: True # Boolean passed to the Controller class, can be used to turn on a
 # Thus, only scenarios that meet these constraints are suitable for sim2real experiments
 
 log_config:
-  exp_name: flight_obstacles # Experiment name
+  exp_name: baseline_faster # Experiment name
   log_dir: "./logs"
   log_level: INFO
   log_terminal: False
 
 rl_config:
   action_space: xyz_relative # Action space, can be xyz, xyz_yaw
-  observation_space: relative_all_goals_all_obstacles_no_acc # relative_only_next_goal, absolute_all_goals
+  observation_space: relative_next_goal_next_obstacle_rp_relative_vel # relative_only_next_goal, absolute_all_goals
   action_bound: 1
   world_lower_bound: [-4, -4, 0]
   world_upper_bound: [4, 4, 2]
-  desirable_vel_bound: 5
+  desirable_vel_bound: 4
   vel_bound: 7
+
+  random_gate_init: False
 
   # Reward fuction
   lambda_progress: 3
   lambda_termination: 1
   lambda_gate_passed: 3
   delay_gate_passed_reward: 3
-  lambda_velocity_limit: 2
+  lambda_velocity_limit: 0
 
   # State Estimation
   state_estimator_buffer_size: 5
 
   # Increase env complexity
-  increase_env_complexity: true
-  increase_gates_obstacles_randomization_step_size: 0.05
-  success_threshold: 0.7
+  increase_env_complexity: false
+  increase_gates_obstacles_randomization_step_size: 0.03
+  success_threshold: 0.8
+  env_complexity_stages: [[gate_obstacle]]
+  env_complexity_cur_stage: 0
 
 
 # Environment
@@ -65,7 +69,7 @@ quadrotor_config:
     init_x_dot: 0
     init_y: 1.0
     init_y_dot: 0
-    init_z: 0.5
+    init_z: 0.2
     init_z_dot: 0
     init_phi: 0
     init_theta: 0
@@ -95,16 +99,16 @@ quadrotor_config:
   init_state_randomization_info:
     init_x: 
       distrib: "uniform"
-      low: -0.1
-      high: 0.1
+      low: -0.0
+      high: 0.0
     init_y: 
       distrib: "uniform"
-      low: -0.1
-      high: 0.1
+      low: -0.0
+      high: 0.0
     init_z:
       distrib: "uniform"
-      low: 0.0
-      high: 0.02
+      low: 0.00
+      high: 0.00
     init_phi:
       distrib: "uniform"
       low: -0.1

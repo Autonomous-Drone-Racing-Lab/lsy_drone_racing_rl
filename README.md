@@ -40,3 +40,23 @@ sudo apt install build-essential
 conda install swig
 ./wrapper/build_linux.sh
 ```
+
+## Execution
+### Trainig
+```
+python scripts/train.py --config # Resume from config
+python scripts/train.py --checkpoint # Resume from checkpoint
+```
+
+## Evaluating
+There are multiple ways of evaluating. The simplest is
+```
+python scripts/test_policy.py --checkpoint 
+```
+Further options are `gui`: whether to use gui
+
+If you want to evaluate about more runs with tracking, run
+```
+python scripts/kaggle.py
+```
+and set the variable `n_runs`, `config`, `checkpoint` accordingly

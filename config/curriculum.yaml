@@ -7,35 +7,39 @@ verbose: True # Boolean passed to the Controller class, can be used to turn on a
 # Thus, only scenarios that meet these constraints are suitable for sim2real experiments
 
 log_config:
-  exp_name: next_gate_rp_relative_vel_more_disturb_safety # Experiment name
+  exp_name: baseline_faster # Experiment used in logger
   log_dir: "./logs"
   log_level: INFO
-  log_terminal: False
+  log_terminal: False # Wheter to log to terminal
 
 rl_config:
-  action_space: xyz_relative # Action space, can be xyz, xyz_yaw
-  observation_space: relative_next_goal_next_obstacle_rp_relative_vel # relative_only_next_goal, absolute_all_goals
-  action_bound: 1
+  action_space: xyz_relative # Choose action space transformation, potentaily cases listed in lsy_drone_racing/action_space_wrapper.py
+  observation_space: relative_next_goal_next_obstacle_rp_relative_vel # Choose observation space transformation, potentaily cases listed in lsy_drone_racing/observation_space_wrapper.py
+  action_bound: 1 # Action bound as described in paper (S)
   world_lower_bound: [-4, -4, 0]
   world_upper_bound: [4, 4, 2]
-  desirable_vel_bound: 4
-  vel_bound: 7
-
-  random_gate_init: False
-
-  # Reward fuction
+  desirable_vel_bound: 4 # When punishsing velocity, bound under which no punishment is applied
+  vel_bound: 7 # Total maximum velocity bound, before crasing drone
+  
+  random_gate_init: False # Whether drone starts each episode initialized at random gate (can potentially improve performance)
+  
+  # Reward fuction weightinf factors (as described in paper)
   lambda_progress: 3
   lambda_termination: 1
   lambda_gate_passed: 3
   delay_gate_passed_reward: 3
-  lambda_velocity_limit: 2
-  lambda_safety: 0.15
+  lambda_velocity_limit: 0
 
-  # State Estimation
-  state_estimator_buffer_size: 5
+ 
+  state_estimator_buffer_size: 5  # Buffer length for state estimator
 
-  # Increase env complexity
-  increase_env_complexity: false
+  # Curriculum learning
+  increase_env_complexity: True # whether to use curriculum
+  env_complexity_stages: [[gate_obstacle]] # What stages to use in curiculum inner list is stages applied at same time outer list number of stages which are repeated if at end. Potential stages are: "gate_obstacle", "init_state"
+  increase_gates_obstacles_randomization_step_size: 0.03 # amount by which gate randomization is increased each time step
+  increase_init_state_randomization_step_size: 0.00 # Amount by which init state randomization is increased each time step
+  success_threshold: 0.8 # minimum succes rate to reach before increasing complexity
+  env_complexity_cur_stage: 0 # Tracker variable which stage we are in if we resume training
 
 
 # Environment
@@ -96,16 +100,16 @@ quadrotor_config:
   init_state_randomization_info:
     init_x: 
       distrib: "uniform"
-      low: -0.2
-      high: 0.2
+      low: -0.0
+      high: 0.0
     init_y: 
       distrib: "uniform"
-      low: -0.2
-      high: 0.2
+      low: -0.0
+      high: 0.0
     init_z:
       distrib: "uniform"
-      low: 0.05
-      high: 0.05
+      low: 0.00
+      high: 0.00
     init_phi:
       distrib: "uniform"
       low: -0.1
@@ -144,12 +148,12 @@ quadrotor_config:
   gates_and_obstacles_randomization_info:
     gates:
       distrib: "uniform"
-      low: -0.3
-      high: 0.3
+      low: -0.15
+      high: 0.15
     obstacles:
       distrib: "uniform"
-      low: -0.3
-      high: 0.3
+      low: -0.15
+      high: 0.15
 
   # Constraints
   constraints:

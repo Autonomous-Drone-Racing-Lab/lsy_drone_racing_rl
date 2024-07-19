@@ -5,6 +5,8 @@ on:
     branches:
       - master
       - main
+      - easy_config
+
   workflow_dispatch:
 
 
@@ -13,8 +15,8 @@ jobs:
 
     runs-on: ubuntu-latest
     env: # Or as an environment variable
-      KAGGLE_USERNAME: ${{ secrets.KaggleUsername }}
-      KAGGLE_KEY: ${{ secrets.KaggleKey }}
+      KAGGLE_USERNAME: ${{ secrets.KAGGLEUSERNAME }}
+      KAGGLE_KEY: ${{ secrets.KAGGLEKEY }}
 
     steps:
       - uses: actions/checkout@v4
@@ -45,6 +47,9 @@ jobs:
         shell: bash -el {0}
       # - run: pip install .
       #   shell: bash -el {0}
+      - run: pip install stable-baselines3
+        shell: bash -el {0}
+      # plot current directory
       - name: Run simulation tests
         run: python scripts/kaggle_original.py
         shell: bash -el {0}

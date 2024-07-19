@@ -17,7 +17,7 @@ def main():
     n_runs = 10
     config: str = "config/level3_extra.yaml"
     controller = "examples/controller.py"
-    checkpoint="/home/tim/code/rl_experiments/lsy_drone_racing_rl/Documentation/version_more_noise/new_best_solution/baseline_1/rl_model_2000000_steps.zip"
+    checkpoint="/home/runner/work/lsy_drone_racing_rl/lsy_drone_racing_rl/Documentation/version_more_noise/new_best_solution/baseline_1/rl_model_2200000_steps"
     controller: str = "lsy_drone_racing/controller/rl_controller.py"
     ep_times = simulate(config=config, controller=controller, checkpoint=checkpoint, n_runs=n_runs, gui=False)
     # Log the number of failed runs if any
