@@ -48,6 +48,11 @@ jobs:
       #   shell: bash -el {0}
       - run: pip install stable-baselines3
         shell: bash -el {0}
+      # plot current directory
+      - run: pwd
+        shell: bash -el {0}
+      - run: ls /home/runner/work/lsy_drone_racing_rl/Documentation
+        shell: bash -el {0}
       - name: Run simulation tests
         run: python scripts/kaggle_original.py
         shell: bash -el {0}
