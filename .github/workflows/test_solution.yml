@@ -14,8 +14,8 @@ jobs:
 
     runs-on: ubuntu-latest
     env: # Or as an environment variable
-      KAGGLE_USERNAME: ${{ secrets.KaggleUsername }}
-      KAGGLE_KEY: ${{ secrets.KaggleKey }}
+      KAGGLE_USERNAME: ${{ secrets.KAGGLEUSERNAME }}
+      KAGGLE_KEY: ${{ secrets.KAGGLEKEY }}
 
     steps:
       - uses: actions/checkout@v4
