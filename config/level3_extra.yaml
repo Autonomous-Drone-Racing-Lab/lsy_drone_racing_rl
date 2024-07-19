@@ -13,7 +13,7 @@ verbose: True # Boolean passed to the Controller class, can be used to turn on a
 # Thus, only scenarios that meet these constraints are suitable for sim2real experiments
 rl_config:
   action_space: xyz_relative # Action space, can be xyz, xyz_yaw
-  observation_space: relative_next_goal_next_obstacle_rp_relative_vel # relative_only_next_goal, absolute_all_goals
+  observation_space: relative_next_goal_next_obstacle_rp_relative_vel #_nearest_gate # relative_next_goal_next_obstacle_rp_relative_vel # relative_only_next_goal, absolute_all_goals
   action_bound: 1
   world_lower_bound: [-4, -4, 0]
   world_upper_bound: [4, 4, 2]

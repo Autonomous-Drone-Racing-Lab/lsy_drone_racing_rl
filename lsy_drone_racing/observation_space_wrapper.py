@@ -73,6 +73,8 @@ def observation_space_wrapper_factory(config):
         return ObservationSpaceWrapperRelativeNextGoalAllObstaclesRPRelativeVel(config)
     elif observation_space == "relative_next_goal_next_obstacle_rp_relative_vel":
         return ObservationSpaceWrapperRelativeNextGoalNextObstacleRPRelativeVel(config)
+    elif observation_space == "relative_next_goal_next_obstacle_rp_relative_vel_nearest_gate":
+        return ObservationSpaceWrapperRelativeNextGoalNextObstacleRPRelativeVelNearestGate(config)
     elif observation_space == "relative_all_goals_rp":
         return ObservationSpaceWrapperRelativeAllGoalAllObstaclesRP(config)
     elif observation_space == "relative_all_goals_rp_relative_vel":
@@ -496,6 +498,88 @@ class ObservationSpaceWrapperRelativeNextGoalNextObstacleRPRelativeVel(Obervatio
 
         obs_limit_low = np.concatenate([world_lower_bound, rpy_lower_bound, drone_vel_limits_lower, ang_vel_bound_lower, gate_limit_lower, obstacle_limit_lower])
         obs_limits_high = np.concatenate([world_upper_bound, rpy_upper_bound, drone_vel_limits_upper, ang_vel_bound_upper, gate_limit_upper, obstacle_limit_upper])
+
+        return Box(obs_limit_low, obs_limits_high, dtype=np.float32)
+    
+class ObservationSpaceWrapperRelativeNextGoalNextObstacleRPRelativeVelNearestGate(ObervationSpaceWrapper):
+    """
+    Observation space wrapper like ObservationSpaceWrapperRelativeAllGoalAllObstaclesRPRelativeVel but only the next gate and nearest obstacle is provided
+    """
+    def __init__(self, config):
+        super().__init__(config)
+
+    def transform_observation(self, obs: np.ndarray, **kwargs):
+        """
+        : param obs: Observation space, i.e. [drone_xyz_yaw, gates_xyz_yaw, gates_in_range, obstacles_xyz, obstacles_in_range, gate_id], see wrapper for definition
+        : returns observation [drone_xyz, drone_vel_xyz, drone_acc_xyz, yaw, cornes of next gate in local frame of drone]
+        """
+        drone_xyz_yaw = obs[0]
+        gates_xyz_yaw = obs[1]
+        gates_in_range = obs[2]
+        obstacles_xyz = obs[3]
+        obstacles_in_range = obs[4]
+        current_gate_id = obs[5]
+
+        estimated_vel = np.array(kwargs["estimated_velocity"])
+        #estimated_acc = kwargs["estimated_acceleration"]
+        rpy = obs[6][:-1] # dont care about yaw
+        ang_vel = obs[7][:-1] # dont care about yaw
+
+        yaw = drone_xyz_yaw[-1]
+        rot_matrix = np.array([
+            [np.cos(yaw), -np.sin(yaw), 0],
+            [np.sin(yaw), np.cos(yaw), 0],
+            [0, 0, 1]
+        ])
+        vel_local_frame = (rot_matrix.T @ estimated_vel.reshape(3, 1)).flatten()
+        
+        gate_corners = convert_gate_to_corners(gates_xyz_yaw[current_gate_id], edge_length=EDGE_LENGTH)
+        gate_corners = translate_points_in_local_frame(drone_xyz_yaw, gate_corners).flatten()
+        
+
+        all_obstacles_local = translate_points_in_local_frame(drone_xyz_yaw, obstacles_xyz)
+        all_obstacles_norm = np.linalg.norm(all_obstacles_local, axis=1)
+        closest_obstacle_idx = np.argmin(all_obstacles_norm)
+        closest_obstacle = all_obstacles_local[closest_obstacle_idx]
+
+        # find nearest gate to not collide
+        gates_distances = np.linalg.norm(gates_xyz_yaw[:, :3] - drone_xyz_yaw[:3], axis=1)
+        nearest_gate_idx = np.argmin(gates_distances)
+        nearest_gate = gates_xyz_yaw[nearest_gate_idx]
+        nearest_gate_corners = convert_gate_to_corners(nearest_gate, edge_length=EDGE_LENGTH)
+        nearest_gate_corners = translate_points_in_local_frame(drone_xyz_yaw, nearest_gate_corners).flatten()
+        
+        obs = np.concatenate([drone_xyz_yaw[:-1], rpy, vel_local_frame, ang_vel, gate_corners, nearest_gate_corners, closest_obstacle]).astype(np.float32)
+        return obs
+
+    def get_observation_space(self):
+        no_gates = len(self.config.quadrotor_config.gates)
+        no_obstacles = len(self.config.quadrotor_config.obstacles)
+
+        world_lower_bound = np.array(self.config.rl_config.world_lower_bound)
+        world_upper_bound = np.array(self.config.rl_config.world_upper_bound)
+        rpy_lower_bound = np.array([-np.pi, -np.pi])
+        rpy_upper_bound = np.array([np.pi, np.pi])
+        
+        vel_bound = self.config.rl_config.vel_bound
+        drone_vel_limits_upper = np.array([vel_bound, vel_bound, vel_bound])
+        drone_vel_limits_lower = -drone_vel_limits_upper
+        ang_vel_bound_lower = np.array([-np.inf, -np.inf])
+        ang_vel_bound_upper = np.array([np.inf, np.inf])
+
+        world_diff = world_upper_bound - world_lower_bound
+        single_gate_limit_upper =np.tile(world_diff, 4)# 4 corners
+        single_gate_limit_lower = -single_gate_limit_upper
+        gate_limit_lower = np.tile(single_gate_limit_lower, 1)
+        gate_limit_upper = np.tile(single_gate_limit_upper, 1)
+
+        singe_obstacle_limit_lower = -world_diff
+        singe_obstacle_limit_upper = world_diff
+        obstacle_limit_lower = np.tile(singe_obstacle_limit_lower, 1)
+        obstacle_limit_upper = np.tile(singe_obstacle_limit_upper, 1)
+
+        obs_limit_low = np.concatenate([world_lower_bound, rpy_lower_bound, drone_vel_limits_lower, ang_vel_bound_lower, gate_limit_lower, gate_limit_lower, obstacle_limit_lower])
+        obs_limits_high = np.concatenate([world_upper_bound, rpy_upper_bound, drone_vel_limits_upper, ang_vel_bound_upper, gate_limit_upper, gate_limit_upper, obstacle_limit_upper])
 
         return Box(obs_limit_low, obs_limits_high, dtype=np.float32)
 
