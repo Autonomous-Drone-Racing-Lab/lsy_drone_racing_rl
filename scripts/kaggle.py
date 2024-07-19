@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 def main():
     """Run the simulation N times and save the results as 'submission.csv'."""
     n_runs = 100
-    config: str = "config/level0_extra.yaml"
+    config: str = "config/level3_extra.yaml"
     #checkpoint: str = "logs/next_gate_rp_relative_vel_more_disturb_test_1/best_model.zip"
     #checkpoint = "Documentation/version_more_noise/best_solution_so_far/best_model.zip"
     #checkpoint="logs/curiculum_learning_1/rl_model_3900000_steps.zip"
