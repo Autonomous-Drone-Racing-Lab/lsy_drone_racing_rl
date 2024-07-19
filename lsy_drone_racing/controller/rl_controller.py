@@ -37,7 +37,7 @@ class Controller():
 
         # For state machine
         self._take_off = False
-        self._take_off_time = 0.15
+        self._take_off_time = 0.2
         self._initialized = False
         self._initialized_time = 0
         self._setpoint_land = False
@@ -86,7 +86,7 @@ class Controller():
         if not self._take_off:
 
             command_type = Command.TAKEOFF
-            args = [0.15, self._take_off_time]  # Height, duration
+            args = [0.2, self._take_off_time]  # Height, duration
             self._take_off = True  # Only send takeoff command once
         elif not self._initialized:
             if ep_time - self._take_off_time > 0:
