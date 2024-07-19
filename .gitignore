@@ -11,6 +11,7 @@ saved_configurations/
 *.npz
 *.pkl
 
+config_copy/
 
 !best_model.zip
 !Documentation/version_more_noise/new_best_solution/baseline_1/rl_model_2000000_steps.zip
