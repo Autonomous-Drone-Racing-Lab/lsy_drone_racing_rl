@@ -1,14 +1,13 @@
 from __future__ import annotations  # Python 3.10 type hints
 
 import numpy as np
+from stable_baselines3 import PPO
 
-from lsy_drone_racing.command import Command
 from lsy_drone_racing.action_space_wrapper import action_space_wrapper_factory
+from lsy_drone_racing.command import Command
 from lsy_drone_racing.experiment_trakcer import ExperimentTracker
 from lsy_drone_racing.observation_space_wrapper import observation_space_wrapper_factory
 from lsy_drone_racing.state_estimator import StateEstimator
-import numpy as np
-from stable_baselines3 import PPO 
 
 
 class Controller():
@@ -27,7 +26,6 @@ class Controller():
             init_pos: Initial position of the drone.
             experiment_tracker: ExperimentTracker object to log data. (Optional)
         """
-
         self.config = config
         self.state_estimator = StateEstimator(config.rl_config.state_estimator_buffer_size) 
         self.observation_space_wrapper = observation_space_wrapper_factory(config)

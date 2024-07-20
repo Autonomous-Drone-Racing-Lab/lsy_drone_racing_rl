@@ -1,20 +1,22 @@
-import numpy as np
-
-from lsy_drone_racing.coordinate_transformation import convert_gate_to_corners, translate_points_in_local_frame
-from gymnasium.spaces import Box
 from abc import ABC
+
+import numpy as np
+from gymnasium.spaces import Box
+
+from lsy_drone_racing.coordinate_transformation import (
+    convert_gate_to_corners,
+    translate_points_in_local_frame,
+)
 
 EDGE_LENGTH = 0.45
 
 class ObervationSpaceWrapper(ABC):
-    """
-    Abstract base class for observation space wrappers.
+    """Abstract base class for observation space wrappers.
 
     An observation space wrapper is an object which takes the observation from the environment as input and converts it into an observation that can be used by the RL agent (NN)
     """
     def __init__(self, config):
-        """
-        Create an observation space wrapper.
+        """Create an observation space wrapper.
 
         Args:
             config: The configuration object.
@@ -22,8 +24,7 @@ class ObervationSpaceWrapper(ABC):
         self.config = config
     
     def transform_observation(self, obs: np.ndarray, **kwargs):
-        """
-        Transform the given environment observation into an observation that can be used by the RL agent (NN).
+        """Transform the given environment observation into an observation that can be used by the RL agent (NN).
 
         Args:
             obs (np.ndarray): The environment observation.
@@ -35,8 +36,7 @@ class ObervationSpaceWrapper(ABC):
         raise NotImplementedError
 
     def _get_next_gate_one_hot(self, current_gate_id):
-        """
-        Helper function to transform gate id into one hot encoding.
+        """Helper function to transform gate id into one hot encoding.
 
         Args:
             current_gate_id: The id of the current gate.
@@ -51,8 +51,7 @@ class ObervationSpaceWrapper(ABC):
         return one_hot
     
     def get_observation_space(self):
-        """
-        Get the observation space
+        """Get the observation space
 
         Returns:
             The observation space.
@@ -61,8 +60,7 @@ class ObervationSpaceWrapper(ABC):
     
 
 def observation_space_wrapper_factory(config):
-    """
-    Factory function to create an observation space wrapper based on the configuration.
+    """Factory function to create an observation space wrapper based on the configuration.
     """
     observation_space = config.rl_config.observation_space
     if observation_space == "relative_only_next_goal":
@@ -92,8 +90,7 @@ def observation_space_wrapper_factory(config):
     
        
 class ObservationSpaceWrapperRelativeOnlyNextGoalAllObstacles(ObervationSpaceWrapper):
-    """
-    Observation space wrapper in relative coordinates. Next goal and all obstacles are provided in the observation space in local frame of the drone.
+    """Observation space wrapper in relative coordinates. Next goal and all obstacles are provided in the observation space in local frame of the drone.
     """
     def __init__(self, config):
         super().__init__(config)
@@ -147,8 +144,7 @@ class ObservationSpaceWrapperRelativeOnlyNextGoalAllObstacles(ObervationSpaceWra
     
 
 class ObservationSpaceWrapperRelativeOnlyNextGoalAllObstaclesRPY(ObervationSpaceWrapper):
-    """
-    Observation space wrapper in relative coordinates. Next goal and all obstacles are provided in the observation space in local frame of the drone.
+    """Observation space wrapper in relative coordinates. Next goal and all obstacles are provided in the observation space in local frame of the drone.
     Additionally drone angles and velocities are provided.
     """
     def __init__(self, config):
@@ -209,8 +205,7 @@ class ObservationSpaceWrapperRelativeOnlyNextGoalAllObstaclesRPY(ObervationSpace
     
 
 class ObservationSpaceWrapperRelativeAllGoalAllObstaclesRP(ObervationSpaceWrapper):
-    """
-    Observation space wrapper in relative coordinates. Next goal and all obstacles are provided in the observation space in local frame of the drone.
+    """Observation space wrapper in relative coordinates. Next goal and all obstacles are provided in the observation space in local frame of the drone.
     Additionally drone angles and velocities are provided, however yaw angle is exldued as it is not important for steerig
     """
     def __init__(self, config):
@@ -278,8 +273,7 @@ class ObservationSpaceWrapperRelativeAllGoalAllObstaclesRP(ObervationSpaceWrappe
         return Box(obs_limit_low, obs_limits_high, dtype=np.float32)
     
 class ObservationSpaceWrapperRelativeAllGoalAllObstaclesRPRelativeVel(ObervationSpaceWrapper):
-    """
-    Observation space wrapper in relative coordinates. Next goal and all obstacles are provided in the observation space in local frame of the drone.
+    """Observation space wrapper in relative coordinates. Next goal and all obstacles are provided in the observation space in local frame of the drone.
     Additionally drone angles and velocities are provided, however without yaw
     Additionaly the vlocity information are translated into the local frame of the drone
     """
@@ -287,8 +281,7 @@ class ObservationSpaceWrapperRelativeAllGoalAllObstaclesRPRelativeVel(Obervation
         super().__init__(config)
 
     def transform_observation(self, obs: np.ndarray, **kwargs):
-        """
-        : param obs: Observation space, i.e. [drone_xyz_yaw, gates_xyz_yaw, gates_in_range, obstacles_xyz, obstacles_in_range, gate_id], see wrapper for definition
+        """: param obs: Observation space, i.e. [drone_xyz_yaw, gates_xyz_yaw, gates_in_range, obstacles_xyz, obstacles_in_range, gate_id], see wrapper for definition
         : returns observation [drone_xyz, drone_vel_xyz, drone_acc_xyz, yaw, cornes of next gate in local frame of drone]
         """
         drone_xyz_yaw = obs[0]
@@ -359,8 +352,7 @@ class ObservationSpaceWrapperRelativeAllGoalAllObstaclesRPRelativeVel(Obervation
         return Box(obs_limit_low, obs_limits_high, dtype=np.float32)
     
 class ObservationSpaceWrapperRelativeNextGoalAllObstaclesRPRelativeVel(ObervationSpaceWrapper):
-    """
-    Observation space wrapper like ObservationSpaceWrapperRelativeAllGoalAllObstaclesRPRelativeVel but only the next gate is provided.
+    """Observation space wrapper like ObservationSpaceWrapperRelativeAllGoalAllObstaclesRPRelativeVel but only the next gate is provided.
     """
     def __init__(self, config):
         super().__init__(config)
@@ -427,15 +419,13 @@ class ObservationSpaceWrapperRelativeNextGoalAllObstaclesRPRelativeVel(Obervatio
         return Box(obs_limit_low, obs_limits_high, dtype=np.float32)
     
 class ObservationSpaceWrapperRelativeNextGoalNextObstacleRPRelativeVel(ObervationSpaceWrapper):
-    """
-    Observation space wrapper like ObservationSpaceWrapperRelativeAllGoalAllObstaclesRPRelativeVel but only the next gate and nearest obstacle is provided
+    """Observation space wrapper like ObservationSpaceWrapperRelativeAllGoalAllObstaclesRPRelativeVel but only the next gate and nearest obstacle is provided
     """
     def __init__(self, config):
         super().__init__(config)
 
     def transform_observation(self, obs: np.ndarray, **kwargs):
-        """
-        : param obs: Observation space, i.e. [drone_xyz_yaw, gates_xyz_yaw, gates_in_range, obstacles_xyz, obstacles_in_range, gate_id], see wrapper for definition
+        """: param obs: Observation space, i.e. [drone_xyz_yaw, gates_xyz_yaw, gates_in_range, obstacles_xyz, obstacles_in_range, gate_id], see wrapper for definition
         : returns observation [drone_xyz, drone_vel_xyz, drone_acc_xyz, yaw, cornes of next gate in local frame of drone]
         """
         drone_xyz_yaw = obs[0]
@@ -502,15 +492,13 @@ class ObservationSpaceWrapperRelativeNextGoalNextObstacleRPRelativeVel(Obervatio
         return Box(obs_limit_low, obs_limits_high, dtype=np.float32)
     
 class ObservationSpaceWrapperRelativeNextGoalNextObstacleRPRelativeVelNearestGate(ObervationSpaceWrapper):
-    """
-    Observation space wrapper like ObservationSpaceWrapperRelativeAllGoalAllObstaclesRPRelativeVel but only the next gate and nearest obstacle is provided
+    """Observation space wrapper like ObservationSpaceWrapperRelativeAllGoalAllObstaclesRPRelativeVel but only the next gate and nearest obstacle is provided
     """
     def __init__(self, config):
         super().__init__(config)
 
     def transform_observation(self, obs: np.ndarray, **kwargs):
-        """
-        : param obs: Observation space, i.e. [drone_xyz_yaw, gates_xyz_yaw, gates_in_range, obstacles_xyz, obstacles_in_range, gate_id], see wrapper for definition
+        """: param obs: Observation space, i.e. [drone_xyz_yaw, gates_xyz_yaw, gates_in_range, obstacles_xyz, obstacles_in_range, gate_id], see wrapper for definition
         : returns observation [drone_xyz, drone_vel_xyz, drone_acc_xyz, yaw, cornes of next gate in local frame of drone]
         """
         drone_xyz_yaw = obs[0]
@@ -584,8 +572,7 @@ class ObservationSpaceWrapperRelativeNextGoalNextObstacleRPRelativeVelNearestGat
         return Box(obs_limit_low, obs_limits_high, dtype=np.float32)
 
 class ObservationSpaceWrapperRelativeAllGoals(ObervationSpaceWrapper):
-    """
-    Observation space wrapper providing information only about gates but not obstacles. Information is provided in relative coordinates
+    """Observation space wrapper providing information only about gates but not obstacles. Information is provided in relative coordinates
     """
     def __init__(self, config):
         super().__init__(config)
@@ -638,8 +625,7 @@ class ObservationSpaceWrapperRelativeAllGoals(ObervationSpaceWrapper):
         return Box(obs_limit_low, obs_limits_high, dtype=np.float32)
 
 class ObservationSpaceWrapperRelativeAllGoalsNoAcc(ObervationSpaceWrapper):
-    """
-    Observation space wrapper providing infor about all gates in relative coordinates but not about obstacles. No acceleration information is provided
+    """Observation space wrapper providing infor about all gates in relative coordinates but not about obstacles. No acceleration information is provided
     """
     def __init__(self, config):
         super().__init__(config)
@@ -688,8 +674,7 @@ class ObservationSpaceWrapperRelativeAllGoalsNoAcc(ObervationSpaceWrapper):
         return Box(obs_limit_low, obs_limits_high, dtype=np.float32)
 
 class ObservationSpaceWrapperRelativeAllGoalsAllObstaclesNoAcc(ObervationSpaceWrapper):
-    """
-    Observation space wrapper providing infor about all gates in relative coordinates and all obstacles. No acceleration information is provided
+    """Observation space wrapper providing infor about all gates in relative coordinates and all obstacles. No acceleration information is provided
     """
     def __init__(self, config):
         super().__init__(config)
@@ -747,8 +732,7 @@ class ObservationSpaceWrapperRelativeAllGoalsAllObstaclesNoAcc(ObervationSpaceWr
         return Box(obs_limit_low, obs_limits_high, dtype=np.float32)
 
 class ObservationSpaceWrapperAbsoluteAllGoals(ObervationSpaceWrapper):
-    """
-    Observation space providing information about all gates in absolute coordinates. No obstacle information is provided
+    """Observation space providing information about all gates in absolute coordinates. No obstacle information is provided
     """
 
     def __init__(self, config):

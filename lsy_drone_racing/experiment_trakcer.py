@@ -1,10 +1,9 @@
-import numpy as np
-import matplotlib.pyplot as plt
 import pickle
+import numpy as np
+
 
 class Experiment:
-    """
-    A class representing an experiment.
+    """A class representing an experiment.
 
     Attributes:
         drone_obs (list): A list of drone observations.
@@ -23,8 +22,7 @@ class Experiment:
 
     @staticmethod
     def from_dict(exp):
-        """
-        Creates an Experiment object from a dictionary.
+        """Creates an Experiment object from a dictionary.
 
         Args:
             exp (dict): A dictionary containing the experiment data.
@@ -38,8 +36,7 @@ class Experiment:
         return experiment
 
     def add_drone_obs(self, drone_obs: np.ndarray):
-        """
-        Adds a drone observation to the list.
+        """Adds a drone observation to the list.
 
         Args:
             drone_obs (numpy.ndarray): The drone observation to add.
@@ -47,8 +44,7 @@ class Experiment:
         self.drone_obs.append(drone_obs)
     
     def add_time_step(self, time):
-        """
-        Adds a time step to the list.
+        """Adds a time step to the list.
 
         Args:
             time: The time step to add.
@@ -56,8 +52,7 @@ class Experiment:
         self.time_step.append(time)
     
     def get_drone_pos(self):
-        """
-        Returns the drone positions as a numpy array.
+        """Returns the drone positions as a numpy array.
 
         Returns:
             numpy.ndarray: The drone positions.
@@ -65,8 +60,7 @@ class Experiment:
         return np.array(self.drone_obs)
 
 class ExperimentTracker:
-    """
-    A class for tracking and saving experiments.
+    """A class for tracking and saving experiments.
 
     Attributes:
         experiments (list): A list of Experiment objects.
@@ -81,14 +75,12 @@ class ExperimentTracker:
         self.experiments = []
     
     def add_experiment(self):
-        """
-        Adds a new Experiment object to the experiments list.
+        """Adds a new Experiment object to the experiments list.
         """
         self.experiments.append(Experiment())
 
     def add_drone_obs(self, drone_obs: np.ndarray, time_step):
-        """
-        Adds drone observations and time step to the current experiment.
+        """Adds drone observations and time step to the current experiment.
 
         Args:
             drone_obs (np.ndarray): The drone observations.
@@ -98,8 +90,7 @@ class ExperimentTracker:
         self.experiments[-1].add_time_step(time_step)
 
     def save_experiment(self, path):
-        """
-        Saves the experiments to a file using pickle.
+        """Saves the experiments to a file using pickle.
 
         Args:
             path: The path to save the experiments file.

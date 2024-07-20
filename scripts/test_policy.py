@@ -6,18 +6,19 @@ Note:
 
 from __future__ import annotations
 
-from lsy_drone_racing.environment import resume_from_checkpoint, start_from_scratch, make_env, create_race_env
-from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
-from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
-from stable_baselines3.common.evaluation import evaluate_policy
-from safe_control_gym.envs.env_wrappers.vectorized_env import make_vec_envs
-from stable_baselines3 import PPO
 import fire
 import matplotlib.pyplot as plt
+from stable_baselines3 import PPO
+from stable_baselines3.common.evaluation import evaluate_policy
 
+from lsy_drone_racing.environment import (
+    create_race_env,
+    resume_from_checkpoint,
+)
 from lsy_drone_racing.environment_tracking_wrapper import TrajectoryTrackingWrapper
 from lsy_drone_racing.utils.logging import setup_test_logger
 from lsy_drone_racing.utils.visualization import visualize_trajectories
+
 
 def main(checkpoint:str, gui: bool = False, random_gate_init: bool = False, show_plot: bool = False):
     print(f"Resuming from checkpoint {checkpoint}")

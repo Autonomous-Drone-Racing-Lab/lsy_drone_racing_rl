@@ -1,22 +1,21 @@
+from abc import ABC
+
 import numpy as np
 from gymnasium.spaces import Box
 
-from abc import ABC
 
 class ActionSpaceWrapper(ABC):
-    """
-        Abstract base class for action space wrappers.
+    """Abstract base class for action space wrappers.
 
-        An action space wrapper is an object which takes the action from the RL agent (NN) as input can conevrts it into an action that can be executed by the drone, i.e.
-        [x, x_dot, x_ddot, y, y_dot, y_ddot, z, z_dot, z_ddot, yaw]
-        """
+    An action space wrapper is an object which takes the action from the RL agent (NN) as input can conevrts it into an action that can be executed by the drone, i.e.
+    [x, x_dot, x_ddot, y, y_dot, y_ddot, z, z_dot, z_ddot, yaw]
+    """
     def __init__(self, config):
         self.config = config
 
     
     def scale_action(self, action: np.ndarray, drone_pose):
-        """
-        Scale the given action based on the drone's pose.
+        """Scale the given action based on the drone's pose.
 
         Args:
             action (np.ndarray): The action to be scaled.
@@ -28,8 +27,7 @@ class ActionSpaceWrapper(ABC):
         raise NotImplementedError
 
     def get_action_space(self):
-        """
-        Get the action space.
+        """Get the action space.
 
         Returns:
             The action space.
@@ -37,8 +35,7 @@ class ActionSpaceWrapper(ABC):
         raise NotImplementedError
 
     def _fill_full_state_array(self, xyz: np.ndarray, yaw: float):
-        """
-        Fill the full state array with the given xyz coordinates and yaw angle.
+        """Fill the full state array with the given xyz coordinates and yaw angle.
 
         Args:
             xyz (np.ndarray): The xyz coordinates.
@@ -55,8 +52,7 @@ class ActionSpaceWrapper(ABC):
         return full_state_action
 
 def action_space_wrapper_factory(config):
-    """
-    Factory function to create an action space wrapper based on the configuration.
+    """Factory function to create an action space wrapper based on the configuration.
     """
     action_space = config.rl_config.action_space
     if action_space == "xyz":
@@ -71,8 +67,7 @@ def action_space_wrapper_factory(config):
         raise ValueError(f"Action space {action_space} not supported.")
     
 class ActionSpaceWrapperXYZ(ActionSpaceWrapper):
-    """
-    Action Space Wrapper converting global coordinates in normed [-1,1] space to unnormliazed coordinates.
+    """Action Space Wrapper converting global coordinates in normed [-1,1] space to unnormliazed coordinates.
     """
     def __init__(self, config):
         super().__init__(config)
@@ -94,8 +89,7 @@ class ActionSpaceWrapperXYZ(ActionSpaceWrapper):
     
 
 class ActionSpaceWrapperXYZYaw(ActionSpaceWrapper):
-    """
-    Action Space Wrapper like (ActionSpaceWrapperXYZ). However, the action space includes a yaw action.
+    """Action Space Wrapper like (ActionSpaceWrapperXYZ). However, the action space includes a yaw action.
     Yaw is provided as normalized global [-1, 1] ) (no offset) and is scaled to the range [-pi, pi].
     """
     def __init__(self, config):
@@ -117,8 +111,7 @@ class ActionSpaceWrapperXYZYaw(ActionSpaceWrapper):
         return Box(low=-action_limits, high=action_limits, dtype=np.float32)
 
 class ActionSpaceWrapperXYZRelative(ActionSpaceWrapper):
-    """
-    Action space wrapper converting relative coordinates to global unnormalized coordinates.
+    """Action space wrapper converting relative coordinates to global unnormalized coordinates.
 
     Relative coordinates are provided as normalized offsets [dx, dy, dz] in the range [-1, 1].
     Global actions are computed by adding offset to the current drone position unnormalizing based on an action range.
@@ -162,8 +155,7 @@ class ActionSpaceWrapperXYZRelative(ActionSpaceWrapper):
         return Box(low=-action_limits, high=action_limits, dtype=np.float32)
     
 class ActionSpaceWrapperXYZRelativeYaw(ActionSpaceWrapper):
-    """
-    Relative ActionSpaceWrapper like (ActionSpaceWrapperXYZRelative). However, the action space includes a yaw action.
+    """Relative ActionSpaceWrapper like (ActionSpaceWrapperXYZRelative). However, the action space includes a yaw action.
     Yaw is provided as normalized global [-1, 1] ) (no offset) and is scaled to the range [-pi, pi].
     """
     def __init__(self, config):

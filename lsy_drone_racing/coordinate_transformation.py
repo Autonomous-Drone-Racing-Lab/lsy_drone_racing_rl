@@ -1,14 +1,13 @@
 import numpy as np
 
+
 def convert_gate_to_corners(gate: np.ndarray, edge_length: float):
-    """
-    Convert a gate to its four corners.
+    """Convert a gate to its four corners.
 
     :param gate: [x, y, z, yaw] of the gate
     :param gate_geometry: dict with keys 'edge', i.e. width and 'height' of the gate
     :return: np.ndarray of shape (4, 3) representing the four corners of the gate
     """
-   
     x, y, height, yaw = gate
    
     half_size = edge_length / 2
@@ -33,14 +32,12 @@ def convert_gate_to_corners(gate: np.ndarray, edge_length: float):
     return corners
 
 def translate_points_in_local_frame(local_frame: np.ndarray, points: np.ndarray):
-    """
-    Convert list of points into the local frame
+    """Convert list of points into the local frame
 
     :param local_frame: [x, y, z, yaw] of the local frame
     :param points: np.ndarray of shape (n, 3) representing the points
     :return: np.ndarray of shape (n, 3) representing the points in the local frame
     """
-
     frame_center = local_frame[:3]
     yaw = local_frame[3]
     R = np.array([
@@ -55,13 +52,11 @@ def translate_points_in_local_frame(local_frame: np.ndarray, points: np.ndarray)
     return points
 
 def visualize_points(points: np.ndarray, axis):
-    """
-    Visualize points in the PyBullet environment.
+    """Visualize points in the PyBullet environment.
 
     :param points: np.ndarray of shape (n, 3) representing the points
     :param axis: matplotlib axis
     """
-
     for point in points:
         axis.scatter(*point, c='r')
 
@@ -96,4 +91,3 @@ if __name__ == "__main__":
     ax.set_zlabel('Z')
 
     plt.show()
-

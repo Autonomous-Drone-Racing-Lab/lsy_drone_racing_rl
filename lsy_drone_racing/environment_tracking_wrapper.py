@@ -1,11 +1,11 @@
-import gymnasium
 import os
+
+import gymnasium
 import numpy as np
-from typing import Any, Dict
+
 
 class TrajectoryTrackingWrapper(gymnasium.Wrapper):
-    """
-    Wrapper object. Tracks the trajectory of the drone and saves it to a file.
+    """Wrapper object. Tracks the trajectory of the drone and saves it to a file.
 
     Args:
         env: The environment to wrap.
@@ -59,4 +59,3 @@ class TrajectoryTrackingWrapper(gymnasium.Wrapper):
         self.trajectory_buffer.append(pos)
         return transformed_obs, reward, terminated, truncated, info
     
-

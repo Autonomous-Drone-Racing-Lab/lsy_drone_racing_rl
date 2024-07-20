@@ -6,9 +6,9 @@ Note:
 
 import logging
 
+import numpy as np
 import pandas as pd
 from sim import simulate
-import numpy as np
 
 logger = logging.getLogger(__name__)
 

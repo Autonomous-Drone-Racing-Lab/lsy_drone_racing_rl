@@ -1,19 +1,20 @@
-from functools import partial
-from pathlib import Path
+import os
 import re
 from copy import deepcopy
+from functools import partial
+from pathlib import Path
 
-import os
 from safe_control_gym.utils.registration import make
 from stable_baselines3.common.env_checker import check_env
+
 from lsy_drone_racing.constants import FIRMWARE_FREQ
 from lsy_drone_racing.utils import load_config
 from lsy_drone_racing.utils.logging import setup_log
 
+
 # At top to prevent cirular import
 def save_config_to_file(config):
-    """
-    Utility function to save config to file in well formated order.
+    """Utility function to save config to file in well formated order.
     The save path is automatically deduced from the config itself.
     """
     log_dir = config.log_config.log_dir
@@ -36,9 +37,10 @@ def save_config_to_file(config):
         yaml.dump(config, f, sort_keys=False, default_flow_style=False, Dumper=CustomDumper)
 
 import yaml
+
+
 def create_experiment_log_folder(logs_dir, experiment_name):
-    """
-    Creates a log directory for an experiment with an incrementing index.
+    """Creates a log directory for an experiment with an incrementing index.
     
     Args:
     - base_dir (str): The base directory where the logs folder should be created.
@@ -47,7 +49,6 @@ def create_experiment_log_folder(logs_dir, experiment_name):
     Returns:
     - str: The path of the created log directory.
     """
-
     if not os.path.exists(logs_dir):
         os.makedirs(logs_dir)
     
@@ -69,8 +70,7 @@ def create_experiment_log_folder(logs_dir, experiment_name):
     return new_folder_path
 
 def create_race_env(config, rank, is_train:bool, random_gate_init: bool=False, gui: bool = False):
-    """
-    Create drone racing evnrionment based on the config.
+    """Create drone racing evnrionment based on the config.
 
     Args:
     - config (Munch): The configuration object.
@@ -97,8 +97,7 @@ def create_race_env(config, rank, is_train:bool, random_gate_init: bool=False, g
     return env
     
 def make_env(config, rank: int, random_init: bool = False):
-    """
-    Utility funciton to generate randomized verctorized environments for training
+    """Utility funciton to generate randomized verctorized environments for training
 
     Args:
     - config (Munch): The configuration object.
@@ -111,8 +110,7 @@ def make_env(config, rank: int, random_init: bool = False):
     return _init
 
 def resume_from_checkpoint(checkpoint_path: str):
-    """
-    Resume training from checkpoint by loading the config and setting up logging.
+    """Resume training from checkpoint by loading the config and setting up logging.
 
     Args:
     - checkpoint_path (str): The path to the checkpoint.
@@ -130,8 +128,7 @@ def resume_from_checkpoint(checkpoint_path: str):
     return config
 
 def start_from_scratch(config_path: Path):
-    """
-    Start training from scratch. Load config and setup all experiment related folders.
+    """Start training from scratch. Load config and setup all experiment related folders.
 
     Args:
     - config_path (Path): The path to the config file.

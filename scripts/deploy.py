@@ -16,6 +16,10 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import fire
+import numpy as np
+import rospy
+from safe_control_gym.utils.registration import make
 
 from lsy_drone_racing.command import Command, apply_command
 from lsy_drone_racing.constants import (
@@ -32,23 +36,16 @@ from lsy_drone_racing.constants import (
     ObstacleDesc,
     QuadrotorPhysicParams,
 )
-
+from lsy_drone_racing.import_utils import get_ros_package_path, pycrazyswarm
 from lsy_drone_racing.utils import (
-   # check_drone_start_pos,
+    # check_drone_start_pos,
     check_gate_pass,
     #check_race_track,
     load_config,
     load_controller,
 )
-from lsy_drone_racing.import_utils import get_ros_package_path, pycrazyswarm
 from lsy_drone_racing.vicon import Vicon
 from lsy_drone_racing.wrapper import DroneRacingWrapper
-
-import fire
-import numpy as np
-import rospy
-from safe_control_gym.utils.registration import make
-
 
 if TYPE_CHECKING:
     from munch import Munch

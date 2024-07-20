@@ -18,27 +18,29 @@ Warning:
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 import numpy as np
 from gymnasium import Wrapper
 from gymnasium.error import InvalidAction
-from gymnasium.spaces import Box
+from munch import munchify
 from safe_control_gym.controllers.firmware.firmware_wrapper import FirmwareWrapper
 
 from lsy_drone_racing.action_space_wrapper import action_space_wrapper_factory
+from lsy_drone_racing.environment import save_config_to_file
 from lsy_drone_racing.observation_space_wrapper import observation_space_wrapper_factory
 from lsy_drone_racing.state_estimator import StateEstimator
 from lsy_drone_racing.utils.delayed_reward import DelayedReward
-import logging
-from lsy_drone_racing.utils.rewards import  progress_reward, safety_reward, state_limits_exceeding_penalty
-from lsy_drone_racing.environment import save_config_to_file
-from munch import munchify
+from lsy_drone_racing.utils.rewards import (
+    progress_reward,
+    safety_reward,
+    state_limits_exceeding_penalty,
+)
 
 
 class DroneRacingWrapper(Wrapper):
-    """
-    Drone racing firmware wrapper to make the environment compatible with the gymnasium API.
+    """Drone racing firmware wrapper to make the environment compatible with the gymnasium API.
 
     In contrast to the underlying environment, this wrapper only accepts FullState commands as
     actions.
@@ -117,7 +119,6 @@ class DroneRacingWrapper(Wrapper):
         Returns:
             The initial observation and info dict of the next episode.
         """
-
         if seed is not None:
             self.logger.info("Setting seed of wrapper to %d", seed)
             self.rng = np.random.default_rng(seed)
@@ -319,8 +320,7 @@ class DroneRacingWrapper(Wrapper):
     
     @staticmethod
     def info_transform(info: dict[str, Any]) -> dict[str, Any]:
-        """
-        Transform the info dict, strip all non-pickable information from it to support multitasking.
+        """Transform the info dict, strip all non-pickable information from it to support multitasking.
         This mainly means that we remove all casadi objects from the info dict.
 
         For now until we know how to do that, only return keys where value is either primitive type, numpy array or dict
@@ -339,8 +339,7 @@ class DroneRacingWrapper(Wrapper):
         return transformed_info
     
     def increase_env_complexity(self):
-        """
-        Increases the environment complexity of the simulator of either the gates and obstacles or the initial state.
+        """Increases the environment complexity of the simulator of either the gates and obstacles or the initial state.
         """
         assert self.config.rl_config.increase_env_complexity, "Increase environment complexity must be set to True"
         assert self.config.rl_config.env_complexity_stages, "Env complexity stages must be set"
@@ -358,10 +357,8 @@ class DroneRacingWrapper(Wrapper):
             save_config_to_file(self.config)
 
     def increase_gates_obstacles_randomization(self):
+        """Increases the environment complexity by increasing the randomization of the gates and obstacles.
         """
-        Increases the environment complexity by increasing the randomization of the gates and obstacles.
-        """
-
         assert self.config.rl_config.increase_env_complexity, "Increase environment complexity must be set to True"
         randomization_step_size = self.config.rl_config.increase_gates_obstacles_randomization_step_size
         assert randomization_step_size > 0, "Randomization step size must be greater than 0"
@@ -402,10 +399,8 @@ class DroneRacingWrapper(Wrapper):
             save_config_to_file(self.config)
 
     def increase_init_state_randomization(self):
+        """Increases the environment complexity by increasing the randomization of the initial state.
         """
-        Increases the environment complexity by increasing the randomization of the initial state.
-        """
-
         assert self.config.rl_config.increase_env_complexity, "Increase environment complexity must be set to True"
         randomization_step_size = self.config.rl_config.increase_init_state_randomization_step_size
         assert randomization_step_size > 0, "Randomization step size must be greater than 0"
@@ -517,7 +512,6 @@ class DroneRacingObservationWrapper:
         Returns:
             The transformed observation and the info dict.
         """
-
         # check whether it 
 
 
