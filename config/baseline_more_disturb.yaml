@@ -7,10 +7,10 @@ verbose: True # Boolean passed to the Controller class, can be used to turn on a
 # Thus, only scenarios that meet these constraints are suitable for sim2real experiments
 
 log_config:
-  exp_name: curiculum # Experiment name used for experiment tracking
-  log_dir: "./logs" # directory to save experiment in
+  exp_name: baseline_more_disturb # Experiment name
+  log_dir: "./logs"
   log_level: INFO
-  log_terminal: False # Wheter to log to terminal
+  log_terminal: False
 
 rl_config:
   action_space: xyz_relative # Choose action space transformation, potentaily cases listed in lsy_drone_racing/action_space_wrapper.py
@@ -20,9 +20,9 @@ rl_config:
   world_upper_bound: [4, 4, 2]
   desirable_vel_bound: 4 # When punishsing velocity, bound under which no punishment is applied
   vel_bound: 7 # Total maximum velocity bound, before crasing drone
-  
-  random_gate_init: False # Whether drone starts each episode initialized at random gate (can potentially improve performance)
-  
+
+  random_gate_init: True # Whether drone starts each episode initialized at random gate (can potentially improve performance)
+
   # Reward fuction weightinf factors (as described in paper)
   lambda_progress: 3
   lambda_termination: 1
@@ -34,13 +34,12 @@ rl_config:
   state_estimator_buffer_size: 5  # Buffer length for state estimator
 
   # Curriculum learning
-  increase_env_complexity: True # whether to use curriculum
+  increase_env_complexity: False # whether to use curriculum
   env_complexity_stages: [[gate_obstacle]] # What stages to use in curiculum inner list is stages applied at same time outer list number of stages which are repeated if at end. Potential stages are: "gate_obstacle", "init_state"
   increase_gates_obstacles_randomization_step_size: 0.03 # amount by which gate randomization is increased each time step
   increase_init_state_randomization_step_size: 0.00 # Amount by which init state randomization is increased each time step
   success_threshold: 0.8 # minimum succes rate to reach before increasing complexity
   env_complexity_cur_stage: 0 # Tracker variable which stage we are in if we resume training
-
 
 # Environment
 quadrotor_config:
@@ -148,12 +147,12 @@ quadrotor_config:
   gates_and_obstacles_randomization_info:
     gates:
       distrib: "uniform"
-      low: -0.15
-      high: 0.15
+      low: -0.2
+      high: 0.2
     obstacles:
       distrib: "uniform"
-      low: -0.15
-      high: 0.15
+      low: -0.2
+      high: 0.2
 
   # Constraints
   constraints:

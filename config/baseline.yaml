@@ -7,8 +7,8 @@ verbose: True # Boolean passed to the Controller class, can be used to turn on a
 # Thus, only scenarios that meet these constraints are suitable for sim2real experiments
 
 log_config:
-  exp_name: baseline_faster # Experiment name
-  log_dir: "./logs"
+  exp_name: baseline  # Experiment name used for experiment tracking
+  log_dir: "./logs" # directory to save experiment in
   log_level: INFO
   log_terminal: False
 

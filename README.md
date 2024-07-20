@@ -28,7 +28,6 @@ pip install .
 > ```bash
 >    pip install setuptools==65.5.0 pip==21 wheel==0.38.4
 > ```
-> first
 
 ```bash
 cd ~/repos
@@ -40,8 +39,19 @@ sudo apt install build-essential
 conda install swig
 ./wrapper/build_linux.sh
 ```
+Finally install stable baselines 3 for training the RL agents
+```
+pip install stable-baselines3
+```
+
+> Important: Do not install the current repo with `pip install .` as this leads to issues with some scripts
 
 ## Execution
+
+### Configuration
+All configuration is done via a config file as shown in `config`. Default values are not supported and all values must be set. If unsure just use the values as provided here. For adapting the RL agent, epsecially the `rl_config` fields are important.
+
+
 ### Trainig
 ```
 python scripts/train.py --config # Resume from config
