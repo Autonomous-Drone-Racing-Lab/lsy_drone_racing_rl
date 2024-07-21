@@ -49,24 +49,29 @@ pip install stable-baselines3
 ## Execution
 
 ### Configuration
-All configuration is done via a config file as shown in `config`. Default values are not supported and all values must be set. If unsure just use the values as provided here. For adapting the RL agent, epsecially the `rl_config` fields are important.
+All configuration is done via a config file as shown in `config`. Default values are not supported and all values must be set. If unsure just use the values as provided here. The config files defined both the environment and the RL agent. For adapting the RL agent, epsecially the `rl_config` fields are important.
 
 
 ### Trainig
+Training is done over the `scripts/train.py` file with options for either starting a new run based on the configuration or resume an existing run. For new run you must provide the path to the config file, e.g. `config/baseline.yaml`. REsuming you provide the path to a checkpoint, the mathching config will automatically be loaded from the folder. During training the agent will be evaluated every 50.000 steps. Per default this happens in a level3 environment. If you want to utilize a different environment you must manually change the code.
+
+To summarize:
 ```
 python scripts/train.py --config # Resume from config
 python scripts/train.py --checkpoint # Resume from checkpoint
 ```
 
 ## Evaluating
-There are multiple ways of evaluating. The simplest is
-```
-python scripts/test_policy.py --checkpoint 
-```
-Further options are `gui`: whether to use gui
+There are multiple ways of evaluating the agent. 
 
-If you want to evaluate about more runs with tracking, run
+The simplest to just test an agen without tracking is to test it from a checkpoint. For this utilize the function
+```
+python scripts/test_policy.py --checkpoint <path to checkpoint> --gui <whether to use gui>
+```
+
+
+If you want to evaluate about more runs and track its result you can use.
 ```
 python scripts/kaggle.py
 ```
-and set the variable `n_runs`, `config`, `checkpoint` accordingly
+This function does not provide as nice of a command line interface, rather you must manually set the variables `n_runs`, `config`, `checkpoint` according to your desire. Config should typically be any of the eval configs [level0, ..., level3]. These configs do not provide and RL configuration. Rather the RL configuration is loaded form the `config.yaml` file next to the checkpoint. Therefore you must make sure the original folder structure is preserved.

@@ -17,7 +17,7 @@ import logging
 import time
 from functools import partial
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 import fire
 import numpy as np
@@ -39,12 +39,13 @@ logger = logging.getLogger(__name__)
 
 
 def simulate(
-    config: str = "logs/next_gate_rp_relative_vel_2/config.yaml",
-    checkpoint: str = "logs/next_gate_rp_relative_vel_2/best_model.zip",
+    config: str = "config/baseline.yaml",
+    checkpoint: str = "Documentation/version_more_noise/new_best_solution/baseline_1/rl_model_2200000_steps.zip",
     controller: str = "lsy_drone_racing/controller/rl_controller.py",
     n_runs: int = 10,
     gui: bool = False,
     terminate_on_lap: bool = True,
+    override_rl_config: Optional[Munch] = None,
 ) -> list[float]:
     """Evaluate the drone controller over multiple episodes.
 
@@ -55,12 +56,17 @@ def simulate(
         n_runs: The number of episodes.
         gui: Enable/disable the simulation GUI.
         terminate_on_lap: Stop the simulation early when the drone has passed the last gate.
+        override_rl_config: Override the quadrotor configuration. This is useful when we want to use the same environment config, with different quadrotor configurations.
 
     Returns:
         A list of episode times.
     """
     # Load configuration and check if firmare should be used.
     config = load_config(Path(config))
+
+    if override_rl_config:
+        config.rl_config = override_rl_config
+
     # Overwrite config options
     config.quadrotor_config.gui = gui
     init_pos = [config.quadrotor_config.init_state.init_x, config.quadrotor_config.init_state.init_y, config.quadrotor_config.init_state.init_z]

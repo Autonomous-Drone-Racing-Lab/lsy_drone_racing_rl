@@ -1,5 +1,7 @@
 """Controler class for simulation and deployment."""
-from __future__ import annotations  # Python 3.10 type hints
+from __future__ import annotations
+
+from typing import Optional  # Python 3.10 type hints
 
 import numpy as np
 from stable_baselines3 import PPO
@@ -27,7 +29,7 @@ class Controller():
         checkpoint: str,
         config: str,
         init_pos: np.ndarray,
-        experiment_tracker: ExperimentTracker = None
+        experiment_tracker: Optional[ExperimentTracker] = None
     ):
         """Initialization of the controller.
 

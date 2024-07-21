@@ -5,10 +5,14 @@ Note:
 """
 
 import logging
+import os
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 from sim import simulate
+
+from lsy_drone_racing.utils.utils import load_config
 
 logger = logging.getLogger(__name__)
 
@@ -16,25 +20,17 @@ logger = logging.getLogger(__name__)
 def main():
     """Run the simulation N times and save the results as 'submission.csv'."""
     n_runs = 100
-    config: str = "config/level0_extra.yaml"
-    #checkpoint: str = "logs/next_gate_rp_relative_vel_more_disturb_test_1/best_model.zip"
-    #checkpoint = "Documentation/version_more_noise/best_solution_so_far/best_model.zip"
-    #checkpoint="logs/curiculum_learning_1/rl_model_3900000_steps.zip"
-    #checkpoint="logs/curiculum_learning_nearest_gate_3/rl_model_1200000_steps.zip"
-    checkpoint="logs/baseline_1/rl_model_2200000_steps.zip" # best thing so far
-    #checkpoint="logs/baseline_more_disturb_1/rl_model_1800000_steps.zip"
-    #checkpoint= "logs/baseline_more_disturb_1/best_model.zip"
-
-    #checkpoint="./logs/curiculum_learning_nearest_gate_3/rl_model_800000_steps.zip"
-    #checkpoint="logs/curiculum_learning_nearest_gate_3/rl_model_2600000_steps.zip" # this was wonderful
-    #checkpoint="logs/next_gate_rp_relative_vel_more_disturb_replicate_1/best_model.zip"
-    #checkpoint="logs/next_gate_rp_relative_vel_more_disturb_replicate_2/best_model.zip"
-    #checkpoint = "logs/next_gate_rp_relative_vel_more_more_disturb_test_1/rl_model_3400000_steps.zip"
-    #config: str = "config/level3_extra_scale.yaml"
-    #checkpoint: str = "logs/next_gate_rp_relative_vel_more_disturb_slow_action_scale_1/rl_model_7800000_steps.zip"
+    config: str = "config/level3.yaml"
+    checkpoint="Documentation/version_more_noise/new_best_solution/baseline_1/rl_model_2200000_steps.zip" # best thing so far
     controller: str = "lsy_drone_racing/controller/rl_controller.py"
+
+    checkpoint_base_path_components = checkpoint.split("/")[:-1]
+    checkpoint_base_path = Path(os.path.join(*checkpoint_base_path_components, "config.yaml"))
+    if not checkpoint_base_path.exists():
+        print("Could not restore config from checkpoint. Make sure that the original folder structure is preserved.")
+    rl_config = load_config(checkpoint_base_path).rl_config
     
-    ep_times = simulate(config=config, controller=controller, checkpoint=checkpoint, n_runs=n_runs, gui=True)
+    ep_times = simulate(config=config, controller=controller, checkpoint=checkpoint, n_runs=n_runs, gui=True, override_rl_config=rl_config)
     # Log the number of failed runs if any
 
     if failed := [x for x in ep_times if x is None]:

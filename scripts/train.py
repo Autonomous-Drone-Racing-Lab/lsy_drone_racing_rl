@@ -62,9 +62,6 @@ def main(checkpoint: str=None, config: str = "config/getting_started.yaml"):
         config_copy = deepcopy(config)
         eval_config.rl_config = config_copy.rl_config
         eval_env = create_race_env(config, rank=0, is_train=False, gui=False, random_gate_init=False)
-        # eval_callback = EvalCallback(eval_env, best_model_save_path=logs_dir, log_path=logs_dir,
-        #                           eval_freq=eval_frquency_scaled,
-        #                          deterministic=True, render=False)
         eval_callback = EvalCallbackCountGatesPassed(eval_env, n_eval_episodes=10, eval_freq=eval_frquency_scaled, 
                                                      log_path=logs_dir, best_model_save_path=logs_dir, deterministic=True, render=False)
     
