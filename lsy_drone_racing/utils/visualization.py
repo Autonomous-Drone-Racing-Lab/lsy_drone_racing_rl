@@ -1,10 +1,12 @@
-import matplotlib.pyplot as plt
+"""Visualize racing trajectories in 3d plot."""
 from typing import List
+
+import matplotlib.pyplot as plt
 import numpy as np
 
+
 def visualize_trajectories(trajectories: List[List[float]]):
-    """
-    Visualize the given trajectories in a 3D plot.
+    """Visualize the given trajectories in a 3D plot.
 
     Args:
         trajectories (List[List[float]]): The trajectories to visualize.

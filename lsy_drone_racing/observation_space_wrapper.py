@@ -1,7 +1,9 @@
+"""Observation space wrapper to convert the observation from the environment into an observation that can be used by the RL agent (NN)."""
 from abc import ABC
 
 import numpy as np
 from gymnasium.spaces import Box
+from munch import Munch
 
 from lsy_drone_racing.coordinate_transformation import (
     convert_gate_to_corners,
@@ -11,11 +13,9 @@ from lsy_drone_racing.coordinate_transformation import (
 EDGE_LENGTH = 0.45
 
 class ObervationSpaceWrapper(ABC):
-    """Abstract base class for observation space wrappers.
-
-    An observation space wrapper is an object which takes the observation from the environment as input and converts it into an observation that can be used by the RL agent (NN)
-    """
-    def __init__(self, config):
+    """Abstract base class for observation space wrappers."""
+    
+    def __init__(self, config: Munch):
         """Create an observation space wrapper.
 
         Args:
@@ -23,7 +23,7 @@ class ObervationSpaceWrapper(ABC):
         """
         self.config = config
     
-    def transform_observation(self, obs: np.ndarray, **kwargs):
+    def transform_observation(self, obs: np.ndarray, **kwargs: dict):
         """Transform the given environment observation into an observation that can be used by the RL agent (NN).
 
         Args:
@@ -35,7 +35,7 @@ class ObervationSpaceWrapper(ABC):
         """
         raise NotImplementedError
 
-    def _get_next_gate_one_hot(self, current_gate_id):
+    def _get_next_gate_one_hot(self, current_gate_id: int) -> np.ndarray:
         """Helper function to transform gate id into one hot encoding.
 
         Args:
@@ -50,8 +50,8 @@ class ObervationSpaceWrapper(ABC):
             one_hot[current_gate_id] = 1
         return one_hot
     
-    def get_observation_space(self):
-        """Get the observation space
+    def get_observation_space(self) -> Box:
+        """Get the observation space.
 
         Returns:
             The observation space.
@@ -59,9 +59,8 @@ class ObervationSpaceWrapper(ABC):
         raise NotImplementedError
     
 
-def observation_space_wrapper_factory(config):
-    """Factory function to create an observation space wrapper based on the configuration.
-    """
+def observation_space_wrapper_factory(config: Munch) -> ObervationSpaceWrapper:
+    """Factory function to create an observation space wrapper based on the configuration."""
     observation_space = config.rl_config.observation_space
     if observation_space == "relative_only_next_goal":
         return ObservationSpaceWrapperRelativeOnlyNextGoalAllObstacles(config)
@@ -77,34 +76,43 @@ def observation_space_wrapper_factory(config):
         return ObservationSpaceWrapperRelativeAllGoalAllObstaclesRP(config)
     elif observation_space == "relative_all_goals_rp_relative_vel":
         return ObservationSpaceWrapperRelativeAllGoalAllObstaclesRPRelativeVel(config)
-    elif observation_space == "relative_all_goals":
-        return ObservationSpaceWrapperRelativeAllGoals(config)
-    elif observation_space == "relative_all_goals_no_acc":
-        return ObservationSpaceWrapperRelativeAllGoalsNoAcc(config)
     elif observation_space == "absolute_all_goals":
         return ObservationSpaceWrapperAbsoluteAllGoals(config)
-    elif observation_space == "relative_all_goals_all_obstacles_no_acc":
-        return ObservationSpaceWrapperRelativeAllGoalsAllObstaclesNoAcc(config)
+    elif observation_space == "relative_all_goals_all_obstacles":
+        return ObservationSpaceWrapperRelativeAllGoalsAllObstacles(config)
     else:
         raise ValueError(f"Observation space {observation_space} not supported.")
     
        
 class ObservationSpaceWrapperRelativeOnlyNextGoalAllObstacles(ObervationSpaceWrapper):
-    """Observation space wrapper in relative coordinates. Next goal and all obstacles are provided in the observation space in local frame of the drone.
+    """Implementation on Observation space wrapper.
+    
+    - Next goal and obstacle are provided in relative coordinates.
     """
-    def __init__(self, config):
+    def __init__(self, config: Munch):
+        """Create an observation space wrapper.
+
+        Args:
+            config: The configuration object.
+        """
         super().__init__(config)
 
-    def transform_observation(self, obs: np.ndarray, **kwargs):
+    def transform_observation(self, obs: np.ndarray, **kwargs: dict) -> np.ndarray:
+        """Transform the given environment observation into an observation that can be used by the RL agent (NN).
+
+        Args:
+            obs (np.ndarray): The environment observation.
+            kwargs: Additional keyword arguments.
+        
+        Returns:
+            The transformed observation
+        """
         drone_xyz_yaw = obs[0]
         gates_xyz_yaw = obs[1]
-        gates_in_range = obs[2]
         obstacles_xyz = obs[3]
-        obstacles_in_range = obs[4]
         current_gate_id = obs[5]
 
         estimated_vel = kwargs["estimated_velocity"]
-        estimated_acc = kwargs["estimated_acceleration"]
 
         
         current_gate = gates_xyz_yaw[current_gate_id]
@@ -115,11 +123,14 @@ class ObservationSpaceWrapperRelativeOnlyNextGoalAllObstacles(ObervationSpaceWra
         all_obstacles_local = translate_points_in_local_frame(drone_xyz_yaw, obstacles_xyz).flatten()
 
         obs = np.concatenate([drone_xyz_yaw[:-1], estimated_vel, gate_corners, all_obstacles_local]).astype(np.float32)
-       # obs = np.concatenate([drone_xyz_yaw[:-1], estimated_vel, estimated_acc, [drone_xyz_yaw[-1]], all_gate_corners, [current_gate_id]]).astype(np.float32)
         return obs
 
-    def get_observation_space(self):
-        no_gates = len(self.config.quadrotor_config.gates)
+    def get_observation_space(self) -> Box:
+        """Get the observation space.
+
+        Returns:
+            The observation space.
+        """
         no_obstacles = len(self.config.quadrotor_config.obstacles)
 
         world_lower_bound = np.array(self.config.rl_config.world_lower_bound)
@@ -144,22 +155,35 @@ class ObservationSpaceWrapperRelativeOnlyNextGoalAllObstacles(ObervationSpaceWra
     
 
 class ObservationSpaceWrapperRelativeOnlyNextGoalAllObstaclesRPY(ObervationSpaceWrapper):
-    """Observation space wrapper in relative coordinates. Next goal and all obstacles are provided in the observation space in local frame of the drone.
-    Additionally drone angles and velocities are provided.
+    """Implementation of Observation space wrapper.
+    
+    - Next goal and all obstacles are provided in the observation space in local frame of the drone.
+    - Drone angles and velocities are provided.
     """
-    def __init__(self, config):
+    def __init__(self, config: Munch):
+        """Create an observation space wrapper.
+
+        Args:
+            config: The configuration object.
+        """
         super().__init__(config)
 
-    def transform_observation(self, obs: np.ndarray, **kwargs):
+    def transform_observation(self, obs: np.ndarray, **kwargs: dict) -> np.ndarray:
+        """Transform the given environment observation into an observation that can be used by the RL agent (NN).
+
+        Args:
+            obs (np.ndarray): The environment observation.
+            kwargs: Additional keyword arguments.
+        
+        Returns:
+            The transformed observation
+        """
         drone_xyz_yaw = obs[0]
         gates_xyz_yaw = obs[1]
-        gates_in_range = obs[2]
         obstacles_xyz = obs[3]
-        obstacles_in_range = obs[4]
         current_gate_id = obs[5]
 
         estimated_vel = kwargs["estimated_velocity"]
-        estimated_acc = kwargs["estimated_acceleration"]
         rpy = obs[6]
         ang_vel = obs[7]
 
@@ -175,8 +199,13 @@ class ObservationSpaceWrapperRelativeOnlyNextGoalAllObstaclesRPY(ObervationSpace
        # obs = np.concatenate([drone_xyz_yaw[:-1], estimated_vel, estimated_acc, [drone_xyz_yaw[-1]], all_gate_corners, [current_gate_id]]).astype(np.float32)
         return obs
 
-    def get_observation_space(self):
-        no_gates = len(self.config.quadrotor_config.gates)
+    
+    def get_observation_space(self) -> Box:
+        """Get the observation space.
+
+        Returns:
+            The observation space.
+        """
         no_obstacles = len(self.config.quadrotor_config.obstacles)
 
         world_lower_bound = np.array(self.config.rl_config.world_lower_bound)
@@ -205,22 +234,35 @@ class ObservationSpaceWrapperRelativeOnlyNextGoalAllObstaclesRPY(ObervationSpace
     
 
 class ObservationSpaceWrapperRelativeAllGoalAllObstaclesRP(ObervationSpaceWrapper):
-    """Observation space wrapper in relative coordinates. Next goal and all obstacles are provided in the observation space in local frame of the drone.
-    Additionally drone angles and velocities are provided, however yaw angle is exldued as it is not important for steerig
-    """
-    def __init__(self, config):
-        super().__init__(config)
+    """Implementation of Observation space wrapper.
 
-    def transform_observation(self, obs: np.ndarray, **kwargs):
+    - All goals and all obstacles are provided in the observation space in local frame of the drone.
+    - Drone angles and velocities are provided. (yaw excluded)
+    """
+    def __init__(self, config: Munch):
+        """Create an observation space wrapper.
+
+        Args:
+            config: The configuration object.
+        """
+        super().__init__(config)
+    
+    def transform_observation(self, obs: np.ndarray, **kwargs: dict) -> np.ndarray:
+        """Transform the given environment observation into an observation that can be used by the RL agent (NN).
+
+        Args:
+            obs (np.ndarray): The environment observation.
+            kwargs: Additional keyword arguments.
+        
+        Returns:
+            The transformed observation
+        """
         drone_xyz_yaw = obs[0]
         gates_xyz_yaw = obs[1]
-        gates_in_range = obs[2]
         obstacles_xyz = obs[3]
-        obstacles_in_range = obs[4]
         current_gate_id = obs[5]
 
         estimated_vel = kwargs["estimated_velocity"]
-        estimated_acc = kwargs["estimated_acceleration"]
         rpy = obs[6][:-1] # dont care about yaw
         ang_vel = obs[7][:-1] # dont care about yaw
 
@@ -241,7 +283,12 @@ class ObservationSpaceWrapperRelativeAllGoalAllObstaclesRP(ObervationSpaceWrappe
        # obs = np.concatenate([drone_xyz_yaw[:-1], estimated_vel, estimated_acc, [drone_xyz_yaw[-1]], all_gate_corners, [current_gate_id]]).astype(np.float32)
         return obs
 
-    def get_observation_space(self):
+    def get_observation_space(self) -> Box:
+        """Get the observation space.
+
+        Returns:
+            The observation space.
+        """
         no_gates = len(self.config.quadrotor_config.gates)
         no_obstacles = len(self.config.quadrotor_config.obstacles)
 
@@ -273,22 +320,33 @@ class ObservationSpaceWrapperRelativeAllGoalAllObstaclesRP(ObervationSpaceWrappe
         return Box(obs_limit_low, obs_limits_high, dtype=np.float32)
     
 class ObservationSpaceWrapperRelativeAllGoalAllObstaclesRPRelativeVel(ObervationSpaceWrapper):
-    """Observation space wrapper in relative coordinates. Next goal and all obstacles are provided in the observation space in local frame of the drone.
-    Additionally drone angles and velocities are provided, however without yaw
-    Additionaly the vlocity information are translated into the local frame of the drone
+    """Implementation of Observation space wrapper.
+
+    - All goals and all obstacles are provided in the observation space in local frame of the drone.
+    - Drone angles and velocities are provided
+    - Velocity is provided in local frame
     """
-    def __init__(self, config):
+    def __init__(self, config: Munch):
+        """Create an observation space wrapper.
+
+        Args:
+            config: The configuration object.
+        """
         super().__init__(config)
 
-    def transform_observation(self, obs: np.ndarray, **kwargs):
-        """: param obs: Observation space, i.e. [drone_xyz_yaw, gates_xyz_yaw, gates_in_range, obstacles_xyz, obstacles_in_range, gate_id], see wrapper for definition
-        : returns observation [drone_xyz, drone_vel_xyz, drone_acc_xyz, yaw, cornes of next gate in local frame of drone]
+    def transform_observation(self, obs: np.ndarray, **kwargs: dict) -> np.ndarray:
+        """Transform the given environment observation into an observation that can be used by the RL agent (NN).
+
+        Args:
+            obs (np.ndarray): The environment observation.
+            kwargs: Additional keyword arguments.
+        
+        Returns:
+            The transformed observation
         """
         drone_xyz_yaw = obs[0]
         gates_xyz_yaw = obs[1]
-        gates_in_range = obs[2]
         obstacles_xyz = obs[3]
-        obstacles_in_range = obs[4]
         current_gate_id = obs[5]
 
         estimated_vel = np.array(kwargs["estimated_velocity"])
@@ -320,7 +378,12 @@ class ObservationSpaceWrapperRelativeAllGoalAllObstaclesRPRelativeVel(Obervation
        # obs = np.concatenate([drone_xyz_yaw[:-1], estimated_vel, estimated_acc, [drone_xyz_yaw[-1]], all_gate_corners, [current_gate_id]]).astype(np.float32)
         return obs
 
-    def get_observation_space(self):
+    def get_observation_space(self) -> Box:
+        """Get the observation space.
+
+        Returns:
+            The observation space.
+        """
         no_gates = len(self.config.quadrotor_config.gates)
         no_obstacles = len(self.config.quadrotor_config.obstacles)
 
@@ -352,17 +415,33 @@ class ObservationSpaceWrapperRelativeAllGoalAllObstaclesRPRelativeVel(Obervation
         return Box(obs_limit_low, obs_limits_high, dtype=np.float32)
     
 class ObservationSpaceWrapperRelativeNextGoalAllObstaclesRPRelativeVel(ObervationSpaceWrapper):
-    """Observation space wrapper like ObservationSpaceWrapperRelativeAllGoalAllObstaclesRPRelativeVel but only the next gate is provided.
+    """Implementation of Observation space wrapper.
+
+    - Next goal and all obstacles are provided in the observation space in local frame of the drone.
+    - Drone angles and velocities are provided
+    - Velocity is provided in local frame
     """
-    def __init__(self, config):
+    def __init__(self, config: Munch):
+        """Create an observation space wrapper.
+
+        Args:
+            config: The configuration object.
+        """
         super().__init__(config)
 
-    def transform_observation(self, obs: np.ndarray, **kwargs):
+    def transform_observation(self, obs: np.ndarray, **kwargs: dict) -> np.ndarray:
+        """Transform the given environment observation into an observation that can be used by the RL agent (NN).
+
+        Args:
+            obs (np.ndarray): The environment observation.
+            kwargs: Additional keyword arguments.
+        
+        Returns:
+            The transformed observation
+        """
         drone_xyz_yaw = obs[0]
         gates_xyz_yaw = obs[1]
-        gates_in_range = obs[2]
         obstacles_xyz = obs[3]
-        obstacles_in_range = obs[4]
         current_gate_id = obs[5]
 
         estimated_vel = np.array(kwargs["estimated_velocity"])
@@ -387,8 +466,12 @@ class ObservationSpaceWrapperRelativeNextGoalAllObstaclesRPRelativeVel(Obervatio
         obs = np.concatenate([drone_xyz_yaw[:-1], rpy, vel_local_frame, ang_vel, gate_corners, all_obstacles_local]).astype(np.float32)
         return obs
 
-    def get_observation_space(self):
-        no_gates = len(self.config.quadrotor_config.gates)
+    def get_observation_space(self) -> Box:
+        """Get the observation space.
+
+        Returns:
+            The observation space.
+        """
         no_obstacles = len(self.config.quadrotor_config.obstacles)
 
         world_lower_bound = np.array(self.config.rl_config.world_lower_bound)
@@ -419,24 +502,36 @@ class ObservationSpaceWrapperRelativeNextGoalAllObstaclesRPRelativeVel(Obervatio
         return Box(obs_limit_low, obs_limits_high, dtype=np.float32)
     
 class ObservationSpaceWrapperRelativeNextGoalNextObstacleRPRelativeVel(ObervationSpaceWrapper):
-    """Observation space wrapper like ObservationSpaceWrapperRelativeAllGoalAllObstaclesRPRelativeVel but only the next gate and nearest obstacle is provided
+    """Implementation of Observation space wrapper.
+
+    - Next goal and nearest obstacle are provided in the observation space in local frame of the drone.
+    - Drone angles and velocities are provided (yaw excluded)
+    - Velocity is provided in local frame
     """
-    def __init__(self, config):
+    def __init__(self, config: Munch):
+        """Create an observation space wrapper.
+
+        Args:
+            config: The configuration object.
+        """
         super().__init__(config)
 
-    def transform_observation(self, obs: np.ndarray, **kwargs):
-        """: param obs: Observation space, i.e. [drone_xyz_yaw, gates_xyz_yaw, gates_in_range, obstacles_xyz, obstacles_in_range, gate_id], see wrapper for definition
-        : returns observation [drone_xyz, drone_vel_xyz, drone_acc_xyz, yaw, cornes of next gate in local frame of drone]
+    def transform_observation(self, obs: np.ndarray, **kwargs: dict) -> np.ndarray:
+        """Transform the given environment observation into an observation that can be used by the RL agent (NN).
+
+        Args:
+            obs (np.ndarray): The environment observation.
+            kwargs: Additional keyword arguments.
+        
+        Returns:
+            The transformed observation
         """
         drone_xyz_yaw = obs[0]
         gates_xyz_yaw = obs[1]
-        gates_in_range = obs[2]
         obstacles_xyz = obs[3]
-        obstacles_in_range = obs[4]
         current_gate_id = obs[5]
 
         estimated_vel = np.array(kwargs["estimated_velocity"])
-        #estimated_acc = kwargs["estimated_acceleration"]
         rpy = obs[6][:-1] # dont care about yaw
         ang_vel = obs[7][:-1] # dont care about yaw
 
@@ -460,10 +555,12 @@ class ObservationSpaceWrapperRelativeNextGoalNextObstacleRPRelativeVel(Obervatio
         obs = np.concatenate([drone_xyz_yaw[:-1], rpy, vel_local_frame, ang_vel, gate_corners, closest_obstacle]).astype(np.float32)
         return obs
 
-    def get_observation_space(self):
-        no_gates = len(self.config.quadrotor_config.gates)
-        no_obstacles = len(self.config.quadrotor_config.obstacles)
+    def get_observation_space(self) -> Box:
+        """Get the observation space.
 
+        Returns:
+            The observation space.
+        """
         world_lower_bound = np.array(self.config.rl_config.world_lower_bound)
         world_upper_bound = np.array(self.config.rl_config.world_upper_bound)
         rpy_lower_bound = np.array([-np.pi, -np.pi])
@@ -492,24 +589,36 @@ class ObservationSpaceWrapperRelativeNextGoalNextObstacleRPRelativeVel(Obervatio
         return Box(obs_limit_low, obs_limits_high, dtype=np.float32)
     
 class ObservationSpaceWrapperRelativeNextGoalNextObstacleRPRelativeVelNearestGate(ObervationSpaceWrapper):
-    """Observation space wrapper like ObservationSpaceWrapperRelativeAllGoalAllObstaclesRPRelativeVel but only the next gate and nearest obstacle is provided
+    """Implementation of Observation space wrapper.
+
+    - Next goal, nearest obstacle and nearest gate are provided in the observation space in local frame of the drone.
+    - Drone angles and velocities are provided, excluding yaw
+    - Velocity is provided in local frame
     """
-    def __init__(self, config):
+    def __init__(self, config: Munch):
+        """Create an observation space wrapper.
+
+        Args:
+            config: The configuration object.
+        """
         super().__init__(config)
 
-    def transform_observation(self, obs: np.ndarray, **kwargs):
-        """: param obs: Observation space, i.e. [drone_xyz_yaw, gates_xyz_yaw, gates_in_range, obstacles_xyz, obstacles_in_range, gate_id], see wrapper for definition
-        : returns observation [drone_xyz, drone_vel_xyz, drone_acc_xyz, yaw, cornes of next gate in local frame of drone]
+    def transform_observation(self, obs: np.ndarray, **kwargs: dict) -> np.ndarray:
+        """Transform the given environment observation into an observation that can be used by the RL agent (NN).
+
+        Args:
+            obs (np.ndarray): The environment observation.
+            kwargs: Additional keyword arguments.
+        
+        Returns:
+            The transformed observation
         """
         drone_xyz_yaw = obs[0]
         gates_xyz_yaw = obs[1]
-        gates_in_range = obs[2]
         obstacles_xyz = obs[3]
-        obstacles_in_range = obs[4]
         current_gate_id = obs[5]
 
         estimated_vel = np.array(kwargs["estimated_velocity"])
-        #estimated_acc = kwargs["estimated_acceleration"]
         rpy = obs[6][:-1] # dont care about yaw
         ang_vel = obs[7][:-1] # dont care about yaw
 
@@ -540,10 +649,12 @@ class ObservationSpaceWrapperRelativeNextGoalNextObstacleRPRelativeVelNearestGat
         obs = np.concatenate([drone_xyz_yaw[:-1], rpy, vel_local_frame, ang_vel, gate_corners, nearest_gate_corners, closest_obstacle]).astype(np.float32)
         return obs
 
-    def get_observation_space(self):
-        no_gates = len(self.config.quadrotor_config.gates)
-        no_obstacles = len(self.config.quadrotor_config.obstacles)
+    def get_observation_space(self) -> Box:
+        """Get the observation space.
 
+        Returns:
+            The observation space.
+        """
         world_lower_bound = np.array(self.config.rl_config.world_lower_bound)
         world_upper_bound = np.array(self.config.rl_config.world_upper_bound)
         rpy_lower_bound = np.array([-np.pi, -np.pi])
@@ -571,120 +682,33 @@ class ObservationSpaceWrapperRelativeNextGoalNextObstacleRPRelativeVelNearestGat
 
         return Box(obs_limit_low, obs_limits_high, dtype=np.float32)
 
-class ObservationSpaceWrapperRelativeAllGoals(ObervationSpaceWrapper):
-    """Observation space wrapper providing information only about gates but not obstacles. Information is provided in relative coordinates
+
+class ObservationSpaceWrapperRelativeAllGoalsAllObstacles(ObervationSpaceWrapper):
+    """Implementation of Observation space wrapper.
+
+    - All goals and all obstacles are provided in the observation space in local frame of the drone.
     """
-    def __init__(self, config):
+    def __init__(self, config: Munch):
+        """Create an observation space wrapper.
+
+        Args:
+            config: The configuration object.
+        """
         super().__init__(config)
 
-    def transform_observation(self, obs: np.ndarray, **kwargs):
-        drone_xyz_yaw = obs[0]
-        gates_xyz_yaw = obs[1]
-        gates_in_range = obs[2]
-        obstacles_xyz = obs[3]
-        obstacles_in_range = obs[4]
-        current_gate_id = obs[5]
+    def transform_observation(self, obs: np.ndarray, **kwargs: dict) -> np.ndarray:
+        """Transform the given environment observation into an observation that can be used by the RL agent (NN).
 
-        estimated_vel = kwargs["estimated_velocity"]
-        estimated_acc = kwargs["estimated_acceleration"]
-
-        # Extract next gate to pass
-        all_gate_corners = []
-        for gate in gates_xyz_yaw:
-            assert len(gate) == 4, "Gate must have 4 elements."
-            gate_corners = convert_gate_to_corners(gate, edge_length=EDGE_LENGTH)
-            gate_corners = translate_points_in_local_frame(drone_xyz_yaw, gate_corners).flatten()
-            all_gate_corners.extend(gate_corners)
+        Args:
+            obs (np.ndarray): The environment observation.
+            kwargs: Additional keyword arguments.
         
-        current_gate_id_one_hot = self._get_next_gate_one_hot(current_gate_id)
-        obs = np.concatenate([drone_xyz_yaw[:-1], estimated_vel, estimated_acc, all_gate_corners, current_gate_id_one_hot]).astype(np.float32)
-
-        return obs
-    
-    def get_observation_space(self):
-        no_gates = len(self.config.quadrotor_config.gates)
-
-        world_lower_bound = np.array(self.config.rl_config.world_lower_bound)
-        world_upper_bound = np.array(self.config.rl_config.world_upper_bound)
-        vel_bound = self.config.rl_config.vel_bound
-        drone_vel_limits_upper = np.array([vel_bound, vel_bound, vel_bound])
-        drone_vel_limits_lower = -drone_vel_limits_upper
-        acc_bound = self.config.rl_config.acc_bound
-        drone_acc_limits_upper = np.array([acc_bound, acc_bound, acc_bound])
-        drone_acc_limits_lower = -drone_acc_limits_upper
-
-        world_diff = world_upper_bound - world_lower_bound
-        single_gate_limit_upper =np.tile(world_diff, 4)# 4 corners
-        single_gate_limit_lower = -single_gate_limit_upper
-        gate_limit_lower = np.tile(single_gate_limit_lower, no_gates)
-        gate_limit_upper = np.tile(single_gate_limit_upper, no_gates)
-
-        obs_limit_low = np.concatenate([world_lower_bound, drone_vel_limits_lower, drone_acc_limits_lower, gate_limit_lower, np.zeros(no_gates)])
-        obs_limits_high = np.concatenate([world_upper_bound, drone_vel_limits_upper, drone_acc_limits_upper, gate_limit_upper, np.ones(no_gates)])
-
-        return Box(obs_limit_low, obs_limits_high, dtype=np.float32)
-
-class ObservationSpaceWrapperRelativeAllGoalsNoAcc(ObervationSpaceWrapper):
-    """Observation space wrapper providing infor about all gates in relative coordinates but not about obstacles. No acceleration information is provided
-    """
-    def __init__(self, config):
-        super().__init__(config)
-
-    def transform_observation(self, obs: np.ndarray, **kwargs):
+        Returns:
+            The transformed observation
+        """
         drone_xyz_yaw = obs[0]
         gates_xyz_yaw = obs[1]
-        gates_in_range = obs[2]
         obstacles_xyz = obs[3]
-        obstacles_in_range = obs[4]
-        current_gate_id = obs[5]
-
-        estimated_vel = kwargs["estimated_velocity"]
-
-        # Extract next gate to pass
-        all_gate_corners = []
-        for gate in gates_xyz_yaw:
-            assert len(gate) == 4, "Gate must have 4 elements."
-            gate_corners = convert_gate_to_corners(gate, edge_length=EDGE_LENGTH)
-            gate_corners = translate_points_in_local_frame(drone_xyz_yaw, gate_corners).flatten()
-            all_gate_corners.extend(gate_corners)
-        
-        current_gate_id_one_hot = self._get_next_gate_one_hot(current_gate_id)
-        obs = np.concatenate([drone_xyz_yaw[:-1], estimated_vel, all_gate_corners, current_gate_id_one_hot]).astype(np.float32)
-
-        return obs
-    
-    def get_observation_space(self):
-        no_gates = len(self.config.quadrotor_config.gates)
-
-        world_lower_bound = np.array(self.config.rl_config.world_lower_bound)
-        world_upper_bound = np.array(self.config.rl_config.world_upper_bound)
-        vel_bound = self.config.rl_config.vel_bound
-        drone_vel_limits_upper = np.array([vel_bound, vel_bound, vel_bound])
-        drone_vel_limits_lower = -drone_vel_limits_upper
-
-        world_diff = world_upper_bound - world_lower_bound
-        single_gate_limit_upper =np.tile(world_diff, 4)# 4 corners
-        single_gate_limit_lower = -single_gate_limit_upper
-        gate_limit_lower = np.tile(single_gate_limit_lower, no_gates)
-        gate_limit_upper = np.tile(single_gate_limit_upper, no_gates)
-
-        obs_limit_low = np.concatenate([world_lower_bound, drone_vel_limits_lower, gate_limit_lower, np.zeros(no_gates)])
-        obs_limits_high = np.concatenate([world_upper_bound, drone_vel_limits_upper, gate_limit_upper, np.ones(no_gates)])
-
-        return Box(obs_limit_low, obs_limits_high, dtype=np.float32)
-
-class ObservationSpaceWrapperRelativeAllGoalsAllObstaclesNoAcc(ObervationSpaceWrapper):
-    """Observation space wrapper providing infor about all gates in relative coordinates and all obstacles. No acceleration information is provided
-    """
-    def __init__(self, config):
-        super().__init__(config)
-
-    def transform_observation(self, obs: np.ndarray, **kwargs):
-        drone_xyz_yaw = obs[0]
-        gates_xyz_yaw = obs[1]
-        gates_in_range = obs[2]
-        obstacles_xyz = obs[3]
-        obstacles_in_range = obs[4]
         current_gate_id = obs[5]
 
         estimated_vel = kwargs["estimated_velocity"]
@@ -705,7 +729,12 @@ class ObservationSpaceWrapperRelativeAllGoalsAllObstaclesNoAcc(ObervationSpaceWr
 
         return obs
     
-    def get_observation_space(self):
+    def get_observation_space(self) -> Box:
+        """Get the observation space.
+
+        Returns:
+            The observation space.
+        """
         no_gates = len(self.config.quadrotor_config.gates)
         no_obstacles = len(self.config.quadrotor_config.obstacles)
 
@@ -731,19 +760,36 @@ class ObservationSpaceWrapperRelativeAllGoalsAllObstaclesNoAcc(ObervationSpaceWr
 
         return Box(obs_limit_low, obs_limits_high, dtype=np.float32)
 
+    
+
 class ObservationSpaceWrapperAbsoluteAllGoals(ObervationSpaceWrapper):
-    """Observation space providing information about all gates in absolute coordinates. No obstacle information is provided
+    """'Implementation of Observation space wrapper.
+
+    - All goals are provided in the observation space in absolute coordinates.
+    - No obstacles are provided
+    - Velocity and Acceleration are provided
     """
 
-    def __init__(self, config):
+    def __init__(self, config: Munch):
+        """Create an observation space wrapper.
+
+        Args:
+            config: The configuration object.
+        """
         super().__init__(config)
 
-    def transform_observation(self, obs:np.ndarray, **kwargs):
+    def transform_observation(self, obs: np.ndarray, **kwargs: dict) -> np.ndarray:
+        """Transform the given environment observation into an observation that can be used by the RL agent (NN).
+
+        Args:
+            obs (np.ndarray): The environment observation.
+            kwargs: Additional keyword arguments.
+        
+        Returns:
+            The transformed observation
+        """
         drone_xyz_yaw = obs[0]
         gates_xyz_yaw = obs[1]
-        gates_in_range = obs[2]
-        obstacles_xyz = obs[3]
-        obstacles_in_range = obs[4]
         current_gate_id = obs[5]
 
         estimated_vel = kwargs["estimated_velocity"]
@@ -752,7 +798,12 @@ class ObservationSpaceWrapperAbsoluteAllGoals(ObervationSpaceWrapper):
         obs = np.concatenate([drone_xyz_yaw[:-1], estimated_vel, estimated_acc, gates_xyz_yaw.flatten(), [current_gate_id]]).astype(np.float32)
         return obs
 
-    def get_observation_space(self):
+    def get_observation_space(self) -> Box:
+        """Get the observation space.
+
+        Returns:
+            The observation space.
+        """
         no_gates = len(self.config.quadrotor_config.gates)
 
         world_lower_bound = np.array(self.config.rl_config.world_lower_bound)
@@ -770,8 +821,3 @@ class ObservationSpaceWrapperAbsoluteAllGoals(ObervationSpaceWrapper):
         obs_limits_high = np.concatenate([world_upper_bound, drone_vel_limits_upper, drone_acc_limits_upper, gate_limit_upper, [no_gates -1]]) # Todo, check if requires -1
 
         return Box(obs_limit_low, obs_limits_high, dtype=np.float32)
-
-
-        
-
-    

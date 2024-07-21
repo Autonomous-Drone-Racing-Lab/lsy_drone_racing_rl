@@ -42,11 +42,6 @@ def main():
     else:
         logger.info("All runs completed successfully!")
 
-    # Abort if all runs failed
-    # if len(failed) > n_runs / 2:
-    #     logger.error("More than 50% of all runs failed! Aborting submission.")
-    #     raise RuntimeError("Too many runs failed!")
-
     no_failed = len(failed)
     failure_rate = no_failed / n_runs
     success_rate = 1 - failure_rate

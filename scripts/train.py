@@ -1,4 +1,4 @@
-"""Example training script using the stable-baselines3 library.
+"""Training script using the stable-baselines3 library.
 
 Note:
     This script requires you to install the stable-baselines3 library.
@@ -26,7 +26,7 @@ from lsy_drone_racing.utils.eval_callback_scale_environment_complexity import (
 from lsy_drone_racing.utils.utils import load_config
 
 
-def main(checkpoint=None, config: str = "config/getting_started.yaml"):
+def main(checkpoint: str=None, config: str = "config/getting_started.yaml"):
     """Create the environment, check its compatibility with sb3, and run a PPO agent."""
     if checkpoint:
         print(f"Resuming from checkpoint {checkpoint}")

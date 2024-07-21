@@ -1,8 +1,4 @@
-"""Example training script using the stable-baselines3 library.
-
-Note:
-    This script requires you to install the stable-baselines3 library.
-"""
+"""Test trained RL agent in the drone racing environment."""
 
 from __future__ import annotations
 
@@ -21,13 +17,21 @@ from lsy_drone_racing.utils.visualization import visualize_trajectories
 
 
 def main(checkpoint:str, gui: bool = False, random_gate_init: bool = False, show_plot: bool = False):
+    """Main function to test agent in the drone racing environment.
+    
+    Args:
+        checkpoint (str): The path to the checkpoint.
+        gui (bool): Whether to show the GUI.
+        random_gate_init (bool): Whether to randomize the start position of the drone (i.e. the start gate).
+        show_plot (bool): Whether to show the plot.
+    """
     print(f"Resuming from checkpoint {checkpoint}")
     config = resume_from_checkpoint(checkpoint)
    
     env = create_race_env(config, gui=gui, is_train=False, random_gate_init=random_gate_init, rank=0)
     
     tracked_trajectories = []
-    def save_trajectory(trajectory):
+    def save_trajectory(trajectory: list):
         tracked_trajectories.append(trajectory)
     
     env = TrajectoryTrackingWrapper(env, on_save_callback=save_trajectory)

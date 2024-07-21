@@ -1,9 +1,11 @@
-import numpy as np
+"""Rewards definition."""
 import math
 
-def progress_reward(current_drone_pose, prev_drone_pose, next_gate_pose):
-    """
-    Reward function that rewards the drone for making progress towards the next gate.
+import numpy as np
+
+
+def progress_reward(current_drone_pose: np.ndarray, prev_drone_pose: np.ndarray, next_gate_pose: np.ndarray) -> float:
+    """Reward function that rewards the drone for making progress towards the next gate.
 
     Args:
         current_drone_pose (np.ndarray): The current drone pose.
@@ -21,9 +23,8 @@ def progress_reward(current_drone_pose, prev_drone_pose, next_gate_pose):
     return reward
 
 
-def smooth_action_reward(current_action, prev_action):
-    """
-    Reward function that rewards the drone for making smooth actions.
+def smooth_action_reward(current_action: np.ndarray, prev_action: np.ndarray) -> float:
+    """Reward function that rewards the drone for making smooth actions.
 
     Args:
         current_action (np.ndarray): The current action.
@@ -35,9 +36,8 @@ def smooth_action_reward(current_action, prev_action):
 
     return -(action_difference ** 2) 
 
-def state_limits_exceeding_penalty(state, desirable_max_state):
-    """
-    Reward function that penalizes the drone for exceeding the state limits.
+def state_limits_exceeding_penalty(state: np.ndarray, desirable_max_state: np.ndarray) -> float:
+    """Reward function that penalizes the drone for exceeding the state limits.
 
     Args:
         state (np.ndarray): The current state of the drone.
@@ -51,9 +51,10 @@ def state_limits_exceeding_penalty(state, desirable_max_state):
     return - math.exp(difference)
 
 
-def safety_reward(current_drone_pose, next_gate_pose):
-    """
-    Safety reward as proposed in https://rpg.ifi.uzh.ch/docs/IROS21_Yunlong.pdf. Reward is provided id drone is algined with center of gate
+def safety_reward(current_drone_pose: np.ndarray, next_gate_pose: np.ndarray) -> float:
+    """Safety reward as to reward drone being aligned with the gate.
+    
+    Implementation as proposed in in https://rpg.ifi.uzh.ch/docs/IROS21_Yunlong.pdf.
 
     Args:
         current_drone_pose (np.ndarray): The current drone pose.

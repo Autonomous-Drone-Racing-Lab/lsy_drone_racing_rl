@@ -1,7 +1,10 @@
+"""Implements utilit function for coordinate transformations."""
+
+import matplotlib.pyplot as plt
 import numpy as np
 
 
-def convert_gate_to_corners(gate: np.ndarray, edge_length: float):
+def convert_gate_to_corners(gate: np.ndarray, edge_length: float) -> np.ndarray:
     """Convert a gate to its four corners.
 
     :param gate: [x, y, z, yaw] of the gate
@@ -31,8 +34,8 @@ def convert_gate_to_corners(gate: np.ndarray, edge_length: float):
 
     return corners
 
-def translate_points_in_local_frame(local_frame: np.ndarray, points: np.ndarray):
-    """Convert list of points into the local frame
+def translate_points_in_local_frame(local_frame: np.ndarray, points: np.ndarray) -> np.ndarray:
+    """Convert list of points into the local frame.
 
     :param local_frame: [x, y, z, yaw] of the local frame
     :param points: np.ndarray of shape (n, 3) representing the points
@@ -51,7 +54,7 @@ def translate_points_in_local_frame(local_frame: np.ndarray, points: np.ndarray)
 
     return points
 
-def visualize_points(points: np.ndarray, axis):
+def visualize_points(points: np.ndarray, axis: plt.Axes):
     """Visualize points in the PyBullet environment.
 
     :param points: np.ndarray of shape (n, 3) representing the points

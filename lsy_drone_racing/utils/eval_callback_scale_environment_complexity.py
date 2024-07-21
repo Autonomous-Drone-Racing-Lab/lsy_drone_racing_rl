@@ -1,30 +1,19 @@
+"""Extension of the EvalCallback to increase env-complexity if the success rate is higher than a threshold."""
 import logging
-import os
-from abc import ABC
 import warnings
-import typing
-from typing import Union, List, Dict, Any, Optional
+from typing import Union
 
 import gym
 import numpy as np
+from stable_baselines3.common.callbacks import BaseCallback
+from stable_baselines3.common.vec_env import DummyVecEnv, VecEnv
 
 from lsy_drone_racing.utils.evaluate_policy import evaluate_policy
-from stable_baselines3.common.vec_env import VecEnv, sync_envs_normalization, DummyVecEnv
-from stable_baselines3.common.callbacks import  BaseCallback
 
 logger = logging.getLogger("drone_rl")
 
 class EvalCallbackIncreaseEnvComplexity(BaseCallback):
-    """
-    Extension of the EvalCallback counting also the number of gates passed. If the number of gates passed exceeds a threshold, the environment complexity is increased.
-
-    :param eval_env: The environment used for initialization
-    :param no_gates: Number of gates in the environment
-    :param n_eval_episodes: The number of episodes to test the agent
-    :param success_threshold: The threshold for the success rate
-    :param eval_freq: Evaluate the agent every ``eval_freq`` call of the callback.
-    :param verbose: Verbosity level: 0 for no output, 1 for indicating information about evaluation results
-    """
+    """Extension of the EvalCallback to increase env-complexity if the success rate is higher than a threshold."""
     def __init__(self, 
                  eval_env: Union[gym.Env, VecEnv],
                  no_gates: int,
@@ -33,6 +22,15 @@ class EvalCallbackIncreaseEnvComplexity(BaseCallback):
                  eval_freq: int = 10000,
                  verbose: int = 1,
                  ):
+        """Create EvalCallbackIncreaseEnvComplexity object.
+        
+        :param eval_env: The environment used for initialization
+        :param no_gates: Number of gates in the environment
+        :param n_eval_episodes: The number of episodes to test the agent
+        :param success_threshold: The threshold for the success rate
+        :param eval_freq: Evaluate the agent every ``eval_freq`` call of the callback.
+        :param verbose: Verbosity level: 0 for no output, 1 for indicating information about evaluation results
+        """
         super().__init__(verbose=verbose)
         self.n_eval_episodes = n_eval_episodes
         self.eval_freq = eval_freq
@@ -48,7 +46,7 @@ class EvalCallbackIncreaseEnvComplexity(BaseCallback):
 
     def _init_callback(self):
         # Does not work in some corner cases, where the wrapper is not the same
-        if not type(self.training_env) is type(self.eval_env):
+        if type(self.training_env) is not type(self.eval_env):
             warnings.warn("Training and eval env are not of the same type"
                           "{} != {}".format(self.training_env, self.eval_env))
 

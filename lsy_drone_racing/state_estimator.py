@@ -1,19 +1,24 @@
+"""State Estimator Module to estimte velocity and acceleration from position measurements."""
 from collections import deque
+from typing import Tuple
 
 import numpy as np
 
 
 class StateEstimator:
-    """Estimate velocity and acceleration of drone based on buffer of position measurements.
-    """
-    def __init__(self, buffer_size):
+    """Class to estimate velocity and acceleration of drone based on buffer of position measurements."""
+    def __init__(self, buffer_size: int):
+        """Initialize the state estimator.
+
+        Args:
+            buffer_size (int): The size of the buffer to store position measurements.
+        """
         self.buffer_size = buffer_size
         self.positions = deque(maxlen=self.buffer_size)
         self.timestamps = deque(maxlen=self.buffer_size)
     
     def reset(self):
-        """Reset the state estimator.
-        """
+        """Reset the state estimator."""
         self.positions.clear()
         self.timestamps.clear()
     
@@ -38,9 +43,8 @@ class StateEstimator:
         self.positions.append(pos)
         self.timestamps.append(timestamp)
 
-    def estimate_state(self):
-        """Estimate velocity and acceleration from the position measurements.
-        """
+    def estimate_state(self) -> Tuple[np.ndarray, np.ndarray]:
+        """Estimate velocity and acceleration from the position measurements."""
         if len(self.positions) < 2:
             return np.zeros(3), np.zeros(3)
         
