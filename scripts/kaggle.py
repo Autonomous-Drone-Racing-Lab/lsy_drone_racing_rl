@@ -24,8 +24,7 @@ def main():
     checkpoint="Documentation/version_more_noise/new_best_solution/baseline_1/rl_model_2200000_steps.zip" # best thing so far
     controller: str = "lsy_drone_racing/controller/rl_controller.py"
 
-    checkpoint_base_path_components = checkpoint.split("/")[:-1]
-    checkpoint_base_path = Path(os.path.join(*checkpoint_base_path_components, "config.yaml"))
+    checkpoint_base_path = Path(checkpoint).parent / "config.yaml"
     if not checkpoint_base_path.exists():
         print("Could not restore config from checkpoint. Make sure that the original folder structure is preserved.")
     rl_config = load_config(checkpoint_base_path).rl_config
