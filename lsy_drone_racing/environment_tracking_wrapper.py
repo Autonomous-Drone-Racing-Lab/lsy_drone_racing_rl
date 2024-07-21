@@ -1,19 +1,24 @@
-import gymnasium
+"""Warpper object to track flown trajcetories for later analysis."""
+
 import os
+from typing import Callable, List, Optional, Tuple
+
+import gymnasium
 import numpy as np
-from typing import Any, Dict
+
 
 class TrajectoryTrackingWrapper(gymnasium.Wrapper):
-    """
-    Wrapper object. Tracks the trajectory of the drone and saves it to a file.
+    """Wrapper object. Tracks the trajectory of the drone and saves it to a file."""
 
-    Args:
+    def __init__(self, env: gymnasium.Wrapper, save_dir: Optional[str]=None, filename: Optional[str]=None, on_save_callback: Optional[Callable[[List[float]], None]]=None):
+        """Creates wrapper object.
+
+        Args:
         env: The environment to wrap.
         save_dir: The directory to save the trajectory to. If None, no file will be created.
         filename: The filename to save the trajectory to. If None, the filename will be "trajectory_tracking.txt".
         on_save_callback: Callback function that is called when the trajectory is saved. The callback function must accept a list of floats.
-    """
-    def __init__(self, env, save_dir=None, filename=None, on_save_callback=None):
+        """
         super(TrajectoryTrackingWrapper, self).__init__(env)
         if save_dir:
             self.log_to_file = True
@@ -29,7 +34,8 @@ class TrajectoryTrackingWrapper(gymnasium.Wrapper):
 
         self.trajectory_buffer = None
     
-    def reset(self, seed= None):
+    def reset(self, seed: Optional[int]= None) -> np.ndarray:
+        """Resets the environment."""
         obs = self.env.reset(
             seed=seed
         )
@@ -44,7 +50,12 @@ class TrajectoryTrackingWrapper(gymnasium.Wrapper):
         self.trajectory_buffer = []
         return obs
 
-    def save_trajectory_to_file(self, traj_flattened):
+    def save_trajectory_to_file(self, traj_flattened: np.ndarray):
+        """Saves the trajectory to the log file provided in the constructor.
+        
+        Args:
+        traj_flattened: The trajectory to save.
+        """
         assert self.log_to_file
         assert self.save_path
         # write one trajectory as space separated list
@@ -53,10 +64,10 @@ class TrajectoryTrackingWrapper(gymnasium.Wrapper):
             f.write("\n")
         
 
-    def step(self, action: np.ndarray):
+    def step(self, action: np.ndarray) -> Tuple[np.ndarray, float, bool, bool, dict]:
+        """Step function of the environment."""
         transformed_obs, reward, terminated, truncated, info = self.env.step(action)
         pos = transformed_obs[:3]
         self.trajectory_buffer.append(pos)
         return transformed_obs, reward, terminated, truncated, info
     
-

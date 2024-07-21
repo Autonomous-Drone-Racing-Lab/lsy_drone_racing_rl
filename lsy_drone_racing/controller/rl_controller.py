@@ -1,21 +1,31 @@
+"""Controler class for simulation and deployment."""
 from __future__ import annotations  # Python 3.10 type hints
 
 import numpy as np
+from stable_baselines3 import PPO
 
-from lsy_drone_racing.command import Command
 from lsy_drone_racing.action_space_wrapper import action_space_wrapper_factory
-from lsy_drone_racing.experiment_trakcer import ExperimentTracker
+from lsy_drone_racing.command import Command
+from lsy_drone_racing.experiment_trakcer import ExperimentTracker  # noqa: TCH001
 from lsy_drone_racing.observation_space_wrapper import observation_space_wrapper_factory
 from lsy_drone_racing.state_estimator import StateEstimator
-import numpy as np
-from stable_baselines3 import PPO 
 
 
 class Controller():
+    """Implementation of a controller class. It is not required for trainig, however, deployment in real-world requires it to be implemented.
+
+    Attention: We are no longer extending the base controll, class to be able to provide more flexibility in the implementation.
+    Still, you must implement the following methods:
+    - compute_control
+    - reset
+    - step_learn
+    - episode_learn
+    - episode_reset
+    """
     def __init__(
         self,
         checkpoint: str,
-        config,
+        config: str,
         init_pos: np.ndarray,
         experiment_tracker: ExperimentTracker = None
     ):
@@ -27,7 +37,6 @@ class Controller():
             init_pos: Initial position of the drone.
             experiment_tracker: ExperimentTracker object to log data. (Optional)
         """
-
         self.config = config
         self.state_estimator = StateEstimator(config.rl_config.state_estimator_buffer_size) 
         self.observation_space_wrapper = observation_space_wrapper_factory(config)
@@ -133,6 +142,7 @@ class Controller():
         return command_type, args
 
     def reset(self):
+        """Initialize/reset data buffers and counters."""
         self.state_estimator.reset()
 
     def step_learn(
@@ -143,9 +153,19 @@ class Controller():
         done: bool | None = None,
         info: dict | None = None,
     ):
+        """Learning and controller updates called between control steps.
+
+        Args:
+            action: Most recent applied action.
+            obs: Most recent observation of the quadrotor state.
+            reward: Most recent reward.
+            done: Most recent done flag.
+            info: Most recent information dictionary.
+        """
         pass
 
     def episode_learn(self):
+        """Learning and controller updates called between episodes."""
         pass
 
     def episode_reset(self):

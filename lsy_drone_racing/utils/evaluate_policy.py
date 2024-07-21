@@ -1,18 +1,18 @@
+"""Trivial Extenstion of the evaluate_policy function to also count the number of gates passed."""
 from typing import List, Tuple, Union
 
 import gym
 import numpy as np
-
 from stable_baselines3.common.vec_env import VecEnv
 
+
 def evaluate_policy(
-    model,
+    model,  # noqa: ANN001
     env: Union[gym.Env, VecEnv],
     n_eval_episodes: int = 10,
     return_episode_rewards: bool = False,
 ) -> Union[Tuple[float, float], Tuple[List[float], List[int]]]:
-    """
-    Trivial Extenstion of the evaluate_policy function to also count the number of gates passed
+    """Trivial Extenstion of the evaluate_policy function to also count the number of gates passed.
 
     :param model: (BaseRLModel) The RL agent you want to evaluate.
     :param env: (gym.Env or VecEnv) The gym environment. In the case of a ``VecEnv``

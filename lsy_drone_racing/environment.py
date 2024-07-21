@@ -1,20 +1,28 @@
-from functools import partial
-from pathlib import Path
+"""Utility functions for creating and managing environments for training and evaluation."""
+import os
 import re
 from copy import deepcopy
+from functools import partial
+from pathlib import Path
 
-import os
+import yaml
+from munch import Munch
 from safe_control_gym.utils.registration import make
 from stable_baselines3.common.env_checker import check_env
+
 from lsy_drone_racing.constants import FIRMWARE_FREQ
 from lsy_drone_racing.utils import load_config
 from lsy_drone_racing.utils.logging import setup_log
 
+
 # At top to prevent cirular import
-def save_config_to_file(config):
-    """
-    Utility function to save config to file in well formated order.
+def save_config_to_file(config: Munch):
+    """Utility function to save config to file in well formated order.
+    
     The save path is automatically deduced from the config itself.
+
+    Args:
+        config (Munch): The configuration object.
     """
     log_dir = config.log_config.log_dir
     config_path = os.path.join(log_dir, "config.yaml")
@@ -23,10 +31,10 @@ def save_config_to_file(config):
     config.quadrotor_config.ctrl_freq = 30
 
     with open(config_path, "w") as f:
-        def represent_flows_as_list(dumper, data):
+        def represent_flows_as_list(dumper, data):  # noqa: ANN001, ANN202
             return dumper.represent_sequence('tag:yaml.org,2002:seq', data, flow_style=True)
 
-        def represent_blocks_as_dict(dumper, data):
+        def represent_blocks_as_dict(dumper, data):  # noqa: ANN001, ANN202
             return dumper.represent_mapping('tag:yaml.org,2002:map', data, flow_style=False)
         class CustomDumper(yaml.SafeDumper):
             pass
@@ -35,19 +43,17 @@ def save_config_to_file(config):
         #print(config.rl_config)
         yaml.dump(config, f, sort_keys=False, default_flow_style=False, Dumper=CustomDumper)
 
-import yaml
-def create_experiment_log_folder(logs_dir, experiment_name):
-    """
-    Creates a log directory for an experiment with an incrementing index.
+
+def create_experiment_log_folder(logs_dir: str, experiment_name: str) -> str:
+    """Creates a log directory for an experiment with an incrementing index.
     
     Args:
-    - base_dir (str): The base directory where the logs folder should be created.
-    - experiment_name (str): The name of the experiment.
+        logs_dir (str): The base directory where the logs folder should be created.
+        experiment_name (str): The name of the experiment.
     
     Returns:
-    - str: The path of the created log directory.
+        str: The path of the created log directory.
     """
-
     if not os.path.exists(logs_dir):
         os.makedirs(logs_dir)
     
@@ -68,16 +74,15 @@ def create_experiment_log_folder(logs_dir, experiment_name):
     
     return new_folder_path
 
-def create_race_env(config, rank, is_train:bool, random_gate_init: bool=False, gui: bool = False):
-    """
-    Create drone racing evnrionment based on the config.
+def create_race_env(config: Munch, rank: int, is_train:bool, random_gate_init: bool=False, gui: bool = False):  # noqa: ANN201
+    """Create drone racing evnrionment based on the config.
 
     Args:
-    - config (Munch): The configuration object.
-    - rank (int): The rank of the environment.
-    - is_train (bool): Whether the environment is used for training or evaluation.
-    - random_gate_init (bool): Whether to randomize the start position of the drone (i.e. the start gate)
-    - gui (bool): Whether to show the GUI.
+        config (Munch): The configuration object.
+        rank (int): The rank of the environment.
+        is_train (bool): Whether the environment is used for training or evaluation.
+        random_gate_init (bool): Whether to randomize the start position of the drone (i.e. the start gate)
+        gui (bool): Whether to show the GUI.
     """
     from lsy_drone_racing.wrapper import DroneRacingWrapper
     config = deepcopy(config) # deepcopy required because we will change argumens
@@ -96,26 +101,24 @@ def create_race_env(config, rank, is_train:bool, random_gate_init: bool=False, g
     check_env(env)
     return env
     
-def make_env(config, rank: int, random_init: bool = False):
-    """
-    Utility funciton to generate randomized verctorized environments for training
+def make_env(config: Munch, rank: int, random_init: bool = False):  # noqa: ANN201
+    """Utility funciton to generate randomized verctorized environments for training.
 
     Args:
-    - config (Munch): The configuration object.
-    - rank (int): The rank of the environment.
-    - random_init (bool): Whether to randomize the start position of the drone (i.e. the start gate)
+        config (Munch): The configuration object.
+        rank (int): The rank of the environment.
+        random_init (bool): Whether to randomize the start position of the drone (i.e. the start gate)
     """
-    def _init():
+    def _init():  # noqa: ANN202
         env = create_race_env(config, is_train=True, rank=rank, gui=False, random_gate_init=random_init)
         return env
     return _init
 
-def resume_from_checkpoint(checkpoint_path: str):
-    """
-    Resume training from checkpoint by loading the config and setting up logging.
+def resume_from_checkpoint(checkpoint_path: str) -> Munch:
+    """Resume training from checkpoint by loading the config and setting up logging.
 
     Args:
-    - checkpoint_path (str): The path to the checkpoint.
+        checkpoint_path (str): The path to the checkpoint.
     """
     checkpoint_path = Path(checkpoint_path)
     assert checkpoint_path.exists(), f"Checkpoint {checkpoint_path} does not exist."
@@ -129,12 +132,11 @@ def resume_from_checkpoint(checkpoint_path: str):
 
     return config
 
-def start_from_scratch(config_path: Path):
-    """
-    Start training from scratch. Load config and setup all experiment related folders.
+def start_from_scratch(config_path: Path) -> Munch:
+    """Start training from scratch. Load config and setup all experiment related folders.
 
     Args:
-    - config_path (Path): The path to the config file.
+        config_path (Path): The path to the config file.
     """
     config_path = Path(config_path)
     assert config_path.exists(), f"Config {config_path} does not exist."

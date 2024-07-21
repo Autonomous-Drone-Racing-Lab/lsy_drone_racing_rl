@@ -6,9 +6,9 @@ Note:
 
 import logging
 
+import numpy as np
 import pandas as pd
 from sim import simulate
-import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -41,11 +41,6 @@ def main():
         logger.warning(f"{len(failed)} runs failed out of {n_runs}!")
     else:
         logger.info("All runs completed successfully!")
-
-    # Abort if all runs failed
-    # if len(failed) > n_runs / 2:
-    #     logger.error("More than 50% of all runs failed! Aborting submission.")
-    #     raise RuntimeError("Too many runs failed!")
 
     no_failed = len(failed)
     failure_rate = no_failed / n_runs

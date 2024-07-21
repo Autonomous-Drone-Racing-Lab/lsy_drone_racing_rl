@@ -1,35 +1,18 @@
+"""Trivial Extenstion of the EvalCallback to also count the number of gates passed."""
 import os
 import warnings
+from typing import Any, Dict, List, Optional, Union
+
 import gym
 import numpy as np
-from stable_baselines3.common.callbacks import  EventCallback, BaseCallback
-import typing
-from typing import Union, List, Dict, Any, Optional
-from stable_baselines3.common.vec_env import VecEnv, sync_envs_normalization, DummyVecEnv
+from stable_baselines3.common.callbacks import BaseCallback, EventCallback
+from stable_baselines3.common.vec_env import DummyVecEnv, VecEnv, sync_envs_normalization
 
 from lsy_drone_racing.utils.evaluate_policy import evaluate_policy
 
-class EvalCallbackCountGatesPassed(EventCallback):
-    """
-    Trivial Extenstion of the EvalCallback to also count the number of gates passed
 
-    :param eval_env: The environment used for initialization
-    :param callback_on_new_best: Callback to trigger
-        when there is a new best model according to the ``mean_reward``
-    :param callback_after_eval: Callback to trigger after every evaluation
-    :param n_eval_episodes: The number of episodes to test the agent
-    :param eval_freq: Evaluate the agent every ``eval_freq`` call of the callback.
-    :param log_path: Path to a folder where the evaluations (``evaluations.npz``)
-        will be saved. It will be updated at each evaluation.
-    :param best_model_save_path: Path to a folder where the best model
-        according to performance on the eval env will be saved.
-    :param deterministic: Whether the evaluation should
-        use a stochastic or deterministic actions.
-    :param render: Whether to render or not the environment during evaluation
-    :param verbose: Verbosity level: 0 for no output, 1 for indicating information about evaluation results
-    :param warn: Passed to ``evaluate_policy`` (warns if ``eval_env`` has not been
-        wrapped with a Monitor wrapper)
-    """
+class EvalCallbackCountGatesPassed(EventCallback):
+    """Trivial Extenstion of the EvalCallback to also count the number of gates passed."""
 
     def __init__(
         self,
@@ -45,6 +28,25 @@ class EvalCallbackCountGatesPassed(EventCallback):
         verbose: int = 1,
         warn: bool = True,
     ):
+        """Create Object.
+        
+        :param eval_env: The environment used for initialization
+        :param callback_on_new_best: Callback to trigger
+        when there is a new best model according to the ``mean_reward``
+        :param callback_after_eval: Callback to trigger after every evaluation
+        :param n_eval_episodes: The number of episodes to test the agent
+        :param eval_freq: Evaluate the agent every ``eval_freq`` call of the callback.
+        :param log_path: Path to a folder where the evaluations (``evaluations.npz``)
+        will be saved. It will be updated at each evaluation.
+        :param best_model_save_path: Path to a folder where the best model
+        according to performance on the eval env will be saved.
+        :param deterministic: Whether the evaluation should
+        use a stochastic or deterministic actions.
+        :param render: Whether to render or not the environment during evaluation
+        :param verbose: Verbosity level: 0 for no output, 1 for indicating information about evaluation results
+        :param warn: Passed to ``evaluate_policy`` (warns if ``eval_env`` has not been
+        wrapped with a Monitor wrapper)
+        """
         super().__init__(callback_after_eval, verbose=verbose)
 
         self.callback_on_new_best = callback_on_new_best
@@ -91,22 +93,6 @@ class EvalCallbackCountGatesPassed(EventCallback):
         # Init callback called on new best model
         if self.callback_on_new_best is not None:
             self.callback_on_new_best.init_callback(self.model)
-
-    def _log_success_callback(self, locals_: Dict[str, Any], globals_: Dict[str, Any]) -> None:
-        """
-        Callback passed to the  ``evaluate_policy`` function
-        in order to log the success rate (when applicable),
-        for instance when using HER.
-
-        :param locals_:
-        :param globals_:
-        """
-        info = locals_["info"]
-
-        if locals_["done"]:
-            maybe_is_success = info.get("is_success")
-            if maybe_is_success is not None:
-                self._is_success_buffer.append(maybe_is_success)
 
     def _on_step(self) -> bool:
         continue_training = True
@@ -197,8 +183,7 @@ class EvalCallbackCountGatesPassed(EventCallback):
         return continue_training
 
     def update_child_locals(self, locals_: Dict[str, Any]) -> None:
-        """
-        Update the references to the local variables.
+        """Update the references to the local variables.
 
         :param locals_: the local variables during rollout collection
         """

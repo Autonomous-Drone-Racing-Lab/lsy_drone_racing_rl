@@ -1,10 +1,12 @@
+"""Logging configuration."""
 import logging
 import sys
 
+from munch import Munch
 
-def setup_log(log_name, log_config):
-    """
-    Setup the logger with the given configuration. Creaing a logger of the proper name and initializing relevant folders
+
+def setup_log(log_name: str, log_config: Munch) -> logging.Logger:
+    """Setup the logger with the given configuration. Creaing a logger of the proper name and initializing relevant folders.
 
     Args:
         log_name: The name of the logger
@@ -29,7 +31,14 @@ def setup_log(log_name, log_config):
     
     return logger
 
-def setup_test_logger(log_name):
+def setup_test_logger(log_name: str) -> logging.Logger:
+    """Setup a logger for testing purposes.
+    
+    The test logger always writes to the console.
+
+    Args:
+        log_name: The name of the logger
+    """
     logger = logging.getLogger(log_name)
     logger.setLevel(logging.DEBUG)
     terminal_handler = logging.StreamHandler(sys.stdout)

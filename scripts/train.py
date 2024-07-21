@@ -1,34 +1,40 @@
-"""Example training script using the stable-baselines3 library.
+"""Training script using the stable-baselines3 library.
 
 Note:
     This script requires you to install the stable-baselines3 library.
 """
 
 from copy import deepcopy
-import logging
 from pathlib import Path
-from lsy_drone_racing.environment import resume_from_checkpoint, start_from_scratch, make_env, create_race_env
-from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
-from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
-from stable_baselines3.common.vec_env.vec_monitor import VecMonitor
-from safe_control_gym.envs.env_wrappers.vectorized_env import make_vec_envs
-from stable_baselines3 import PPO
-import fire
 
+import fire
+from stable_baselines3 import PPO
+from stable_baselines3.common.callbacks import CheckpointCallback
+from stable_baselines3.common.vec_env import SubprocVecEnv
+from stable_baselines3.common.vec_env.vec_monitor import VecMonitor
+
+from lsy_drone_racing.environment import (
+    create_race_env,
+    make_env,
+    resume_from_checkpoint,
+    start_from_scratch,
+)
 from lsy_drone_racing.utils.eval_callback_count_gates_passed import EvalCallbackCountGatesPassed
-from lsy_drone_racing.utils.eval_callback_scale_environment_complexity import EvalCallbackIncreaseEnvComplexity
+from lsy_drone_racing.utils.eval_callback_scale_environment_complexity import (
+    EvalCallbackIncreaseEnvComplexity,
+)
 from lsy_drone_racing.utils.utils import load_config
 
-def main(checkpoint=None, config: str = "config/getting_started.yaml"):
+
+def main(checkpoint: str=None, config: str = "config/getting_started.yaml"):
     """Create the environment, check its compatibility with sb3, and run a PPO agent."""
-    
     if checkpoint:
         print(f"Resuming from checkpoint {checkpoint}")
         if config:
-            print(f"Warning: config argument will be ignored when resuming from checkpoint")
+            print("Warning: config argument will be ignored when resuming from checkpoint")
         config = resume_from_checkpoint(checkpoint)
     else:
-        print(f"Starting from scratch")
+        print("Starting from scratch")
         config = start_from_scratch(config)
 
     num_processes = 4

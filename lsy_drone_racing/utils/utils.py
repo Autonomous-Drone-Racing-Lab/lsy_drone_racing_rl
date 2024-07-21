@@ -13,7 +13,7 @@ import pybullet as p
 import yaml
 from munch import munchify
 
-from lsy_drone_racing.controller.rl_controller import Controller
+from lsy_drone_racing.controller.rl_controller import Controller  # noqa: TCH001
 
 if TYPE_CHECKING:
     from munch import Munch
@@ -40,8 +40,6 @@ def load_controller(path: Path) -> Type[Controller]:
         return controller_module.Controller
     except ImportError as e:
         raise e
-
-
 
 
 def load_config(path: Path) -> Munch:

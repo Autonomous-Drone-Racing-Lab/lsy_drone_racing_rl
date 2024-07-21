@@ -10,6 +10,7 @@ Look for instructions in `README.md` and `edit_this.py`.
 from __future__ import annotations
 
 import sys
+
 sys.path.append(".")
 
 import logging
@@ -49,6 +50,7 @@ def simulate(
 
     Args:
         config: The path to the configuration file.
+        checkpoint: The path to the controller checkpoint.
         controller: The path to the controller module.
         n_runs: The number of episodes.
         gui: Enable/disable the simulation GUI.
