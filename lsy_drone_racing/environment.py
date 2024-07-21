@@ -40,7 +40,6 @@ def save_config_to_file(config: Munch):
             pass
         CustomDumper.add_representer(list, represent_flows_as_list)
         CustomDumper.add_representer(dict, represent_blocks_as_dict)
-        #print(config.rl_config)
         yaml.dump(config, f, sort_keys=False, default_flow_style=False, Dumper=CustomDumper)
 
 

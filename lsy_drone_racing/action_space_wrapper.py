@@ -126,7 +126,6 @@ class ActionSpaceWrapperXYZYaw(ActionSpaceWrapper):
         scaled_phi = action[3] * np.pi
 
         scaled_space = np.concatenate([scaled_xyz, [scaled_phi]])
-        print(f"Action space: {scaled_space}")
 
         return scaled_space
     

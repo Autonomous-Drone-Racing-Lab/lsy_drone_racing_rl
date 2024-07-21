@@ -101,7 +101,6 @@ class Controller():
             self._take_off = True  # Only send takeoff command once
         elif not self._initialized:
             if ep_time - self._take_off_time > 0:
-                print("Initializing")
                 command_type = Command.FULLSTATE
                 args = [self._trained_start_pos, np.zeros(3), np.zeros(3), 0.0, np.zeros(3), ep_time]
                 self._initialized = True

@@ -26,6 +26,7 @@ def main():
     checkpoint_base_path = Path(checkpoint).parent / "config.yaml"
     if not checkpoint_base_path.exists():
         print("Could not restore config from checkpoint. Make sure that the original folder structure is preserved.")
+        exit(1)
     rl_config = load_config(checkpoint_base_path).rl_config
     
     ep_times = simulate(config=config, controller=controller, checkpoint=checkpoint, n_runs=n_runs, gui=False, override_rl_config=rl_config)
